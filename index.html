@@ -54,7 +54,7 @@
 
     table.kv { width: 100%; border-collapse: collapse; font-size: .9rem; }
     table.kv td { padding: 6px 4px; border-bottom: 1px solid #edf1f5; }
-    table.kv td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+    table.kv td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
 
     .checks { list-style: none; margin-top: 8px; }
     .checks li { display: flex; gap: 10px; padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; font-size: .92rem; }
@@ -75,17 +75,33 @@
     .item { border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: block; transition: border-color .15s; }
     .item:hover { border-color: #9fb3c8; }
     .item.on { border-color: var(--navy); background: var(--navy-soft); }
-    .item input { margin-right: 6px; accent-color: var(--navy); }
-    .item .nm { font-weight: 700; }
-    .item .cost { float: right; color: var(--red); font-weight: 700; }
+    .item .hd { display: flex; align-items: flex-start; gap: 6px; }
+    .item input { margin-top: 4px; accent-color: var(--navy); flex: none; }
+    .item .nm { font-weight: 700; flex: 1; }
+    .item .cost { color: var(--red); font-weight: 700; white-space: nowrap; }
     .item .ds { font-size: .82rem; color: var(--muted); margin-top: 4px; }
     .budget { height: 12px; background: #e6ebf1; border-radius: 6px; overflow: hidden; margin: 6px 0 2px; }
     .budget div { height: 100%; background: var(--navy); transition: width .2s; }
     .budget.over div { background: var(--red); }
     .problems { color: var(--red); font-weight: 600; font-size: .9rem; margin-top: 6px; }
 
-    svg { width: 100%; height: auto; display: block; }
+    svg.fig { width: 100%; height: auto; display: block; }
     svg text { font-family: var(--font); }
+    svg.ic { display: inline-block; vertical-align: -0.2em; flex: none; }
+    .glyph * { vector-effect: non-scaling-stroke; }
+    .figure { border: 1px solid var(--border); border-radius: 10px; background: #fbfcfe; padding: 10px 12px; margin: 12px 0 18px; }
+    .figure .cap { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+    .figure .wide { min-width: 640px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 42px; height: 42px; border-radius: 50%; background: #fff; color: var(--red); display: flex; align-items: center; justify-content: center; flex: none; }
+    nav button .ic { margin-right: 4px; }
+    .item .nm .ic { color: var(--navy); margin-right: 4px; }
+    .item:not(.on) .nm .ic { color: var(--muted); }
+    .task-ic { width: 34px; height: 34px; border-radius: 50%; background: var(--navy-soft); color: var(--navy); display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; float: left; }
+    .cust { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .cust span { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; font-size: .85rem; }
+    .cust span.pri { border-color: var(--red); color: var(--red); font-weight: 600; }
+    .medal { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: .8rem; }
 
     table.tasks { width: 100%; border-collapse: collapse; font-size: .9rem; }
     table.tasks th { text-align: left; background: var(--navy); color: #fff; padding: 8px; font-weight: 600; }
@@ -130,14 +146,19 @@
       table.tasks tr { border-bottom: 2px solid var(--border); padding: 6px 0; }
       table.tasks td { border: none; padding: 4px 0; }
       .scroll { overflow-x: auto; }
+      .figure .wide { min-width: 760px; }
+      .figure .cap::before { content: '← Kéo ngang để xem toàn bộ hình →'; display: block; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h1>Kỹ sư thiết kế: cấp điện cho khu đô thị mới</h1>
-      <div class="sub">Nhập môn Hệ thống điện · Buổi 2 · Bài thực hành chấm tự động</div>
+    <div class="brand">
+      <div class="logo" data-icon="bolt" data-size="24"></div>
+      <div>
+        <h1>Kỹ sư thiết kế: cấp điện cho khu đô thị mới</h1>
+        <div class="sub">Nhập môn Hệ thống điện · Buổi 2 · Bài thực hành chấm tự động</div>
+      </div>
     </div>
     <div class="student">
       <input id="studentName" placeholder="Họ và tên" autocomplete="name" />
@@ -148,13 +169,13 @@
   </header>
 
   <nav id="tabs">
-    <button data-tab="guide" class="active">Hướng dẫn</button>
-    <button data-tab="l1">Cấp 1 <span class="pts" id="tabPts-l1">0/20</span></button>
-    <button data-tab="l2">Cấp 2 <span class="pts" id="tabPts-l2">0/30</span></button>
-    <button data-tab="l3">Cấp 3 <span class="pts" id="tabPts-l3">0/30</span></button>
-    <button data-tab="career">Nghề nghiệp <span class="pts" id="tabPts-career">0/8 câu</span></button>
-    <button data-tab="submit">Nộp bài</button>
-    <button data-tab="board">Bảng điểm</button>
+    <button data-tab="guide" class="active"><span data-icon="book"></span>Hướng dẫn</button>
+    <button data-tab="l1"><span data-icon="pylon"></span>Cấp 1 <span class="pts" id="tabPts-l1">0/20</span></button>
+    <button data-tab="l2"><span data-icon="battery"></span>Cấp 2 <span class="pts" id="tabPts-l2">0/30</span></button>
+    <button data-tab="l3"><span data-icon="car"></span>Cấp 3 <span class="pts" id="tabPts-l3">0/30</span></button>
+    <button data-tab="career"><span data-icon="briefcase"></span>Nghề nghiệp <span class="pts" id="tabPts-career">0/8 câu</span></button>
+    <button data-tab="submit"><span data-icon="send"></span>Nộp bài</button>
+    <button data-tab="board"><span data-icon="trophy"></span>Bảng điểm</button>
   </nav>
 
   <main>
@@ -162,6 +183,8 @@
     <section class="panel guide active" id="panel-guide">
       <h2>Bạn là kỹ sư thiết kế của khu đô thị mới</h2>
       <p class="lead">Khu đô thị có bệnh viện, trung tâm dữ liệu, nhà máy và khu dân cư, tổng nhu cầu 40 MW. Nhiệm vụ của bạn: chọn nguồn, định cỡ pin lưu trữ, thiết kế cách sạc xe điện, rồi chỉ ra ai trong ngành điện sẽ làm từng phần việc.</p>
+      <div class="figure"><div class="scroll"><div class="wide" id="heroScene"></div></div>
+        <div class="cap">Sơ đồ toàn cảnh khu đô thị bạn sẽ thiết kế: nguồn lưới qua hai tuyến về trạm, thanh cái cấp cho bốn nhóm khách hàng, các nguồn tại chỗ và bãi sạc xe điện. Sơ đồ minh họa, không phải bản vẽ kỹ thuật.</div></div>
       <div class="grid2">
         <div class="card">
           <h3 style="margin-top:0">Bốn phần của bài</h3>
@@ -200,6 +223,8 @@
     <section class="panel" id="panel-l1">
       <h2>Cấp 1 — Chọn hạng mục trong 100 điểm</h2>
       <p class="lead">Mỗi hạng mục mua tối đa một lần. Phương án phải qua cả ba phép kiểm tra. Mỗi phép kiểm tra bắt đầu độc lập, pin đầy ở đầu mỗi tình huống, và đều diễn ra <b>ban đêm</b>.</p>
+      <div class="figure"><div class="scroll"><div class="wide" id="l1Scene"></div></div>
+        <div class="cap">Sơ đồ phương án của bạn: hạng mục đã chọn có màu, hạng mục chưa chọn hiện mờ và nét đứt.</div></div>
       <div class="grid2">
         <div>
           <div class="items" id="l1Items"></div>
@@ -209,7 +234,8 @@
             <div class="problems" id="l1Problems"></div>
           </div>
           <div class="story" style="margin-top:16px;">
-            <b>Bốn nhóm khách hàng:</b> bệnh viện 5 MW và trung tâm dữ liệu 10 MW (ưu tiên, tổng 15 MW); nhà máy 15 MW và khu dân cư 10 MW (được cắt khi mất nguồn chính).
+            <b>Bốn nhóm khách hàng, tổng 40 MW.</b> Tải ưu tiên (viền đỏ, tổng 15 MW) phải được giữ khi mất nguồn chính; hai nhóm còn lại được cắt.
+            <div class="cust" id="l1Cust"></div>
           </div>
         </div>
         <div class="card">
@@ -226,6 +252,8 @@
       <p class="lead">Công suất (MW) quyết định pin cấp <b>nhanh</b> đến đâu; dung lượng (MWh) quyết định cấp được <b>bao lâu</b>. Năng lượng dùng được = E × (SOC lúc sự cố − SOC tối thiểu). Chi phí giả định: <b>2 điểm/MW</b> và <b>1 điểm/MWh</b>.</p>
       <div class="scen" id="l2Scen"></div>
       <div class="story" id="l2Story"></div>
+      <div class="figure"><div class="scroll"><div class="wide" id="l2Scene"></div></div>
+        <div class="cap">Bên trái: ai cấp cho 15 MW tải ưu tiên khi mất nguồn chính. Bên phải: viên pin bạn chọn; chỉ phần màu xanh đậm là năng lượng dùng được.</div></div>
       <div class="grid2">
         <div>
           <div class="slider"><label>Công suất pin P <output id="l2Pout"></output></label><input type="range" id="l2P" /><div class="hint">0–25 MW, bước 1 MW</div></div>
@@ -247,6 +275,8 @@
       <p class="lead">Bãi đỗ dùng chung một máy biến áp phân phối <b>4 MW</b> với khu căn hộ. Mỗi bộ sạc tối đa 7 kW. Đặt giới hạn tổng công suất sạc cho từng khung giờ sao cho máy biến áp không quá tải, xe sạc đủ trước 6 giờ sáng và tiền điện thấp nhất.</p>
       <div class="scen" id="l3Scen"></div>
       <div class="story" id="l3Story"></div>
+      <div class="figure"><div class="scroll"><div class="wide" id="l3Scene"></div></div>
+        <div class="cap">Đồng hồ cho biết khung giờ máy biến áp mang tải nặng nhất; mỗi biểu tượng xe tương ứng 40 xe; thanh pin là năng lượng đã sạc so với nhu cầu.</div></div>
       <div class="grid2">
         <div>
           <div id="l3Sliders"></div>
@@ -277,7 +307,7 @@
 
     <!-- ================= NỘP BÀI ================= -->
     <section class="panel" id="panel-submit">
-      <h2>Nộp bài</h2>
+      <h2><span data-icon="send" data-size="22"></span> Nộp bài</h2>
       <p class="lead" id="serverStatus">Đang kiểm tra máy chủ nộp bài...</p>
       <div class="scroll">
         <table class="report">
@@ -294,7 +324,7 @@
 
     <!-- ================= BẢNG ĐIỂM ================= -->
     <section class="panel" id="panel-board">
-      <h2>Bảng điểm</h2>
+      <h2><span data-icon="trophy" data-size="22"></span> Bảng điểm</h2>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
         <input id="boardSearch" placeholder="Tìm tên hoặc MSSV" style="padding:7px 10px; border:1px solid var(--border); border-radius:6px; flex:1 1 200px;" />
         <select id="boardClass" style="padding:7px 10px; border:1px solid var(--border); border-radius:6px;"><option value="">Tất cả các lớp</option></select>
@@ -658,6 +688,181 @@ var TKCD_GRADER = (function () {
     function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
     function pillClass(s, max) { const r = s / max; return r >= .8 ? 'full' : r >= .5 ? 'mid' : 'low'; }
 
+    /* ---------------- Biểu tượng (SVG nét, lưới 24 × 24) ---------------- */
+    const ICONS = {
+      bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+      book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+      pylon: '<path d="M8 22 12 2l4 20"/><path d="M5 7h14M6.5 12h11M9.6 12l4.8 5M14.4 12l-4.8 5M9 17h6"/>',
+      generator: '<rect x="2" y="6" width="16" height="12" rx="2"/><path d="M18 9h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2"/><path d="M5 18v3M15 18v3"/><path d="m11 8-3 4h4l-3 4"/>',
+      solar: '<path d="M2 21h20"/><path d="M4 18 6.5 10h11l2.5 8z"/><path d="M5.3 14h13.4M12 10v8"/><circle cx="19" cy="4.5" r="1.8"/>',
+      battery: '<rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><path d="M6 10v4M10 10v4M14 10v4"/>',
+      lines: '<path d="M2 8h20M2 16h20"/><path d="m18 5 3 3-3 3M18 13l3 3-3 3"/>',
+      transformer: '<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/>',
+      hospital: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M12 8v6M9 11h6"/><path d="M10 21v-3h4v3"/>',
+      server: '<rect x="3" y="3" width="18" height="7" rx="1.5"/><rect x="3" y="14" width="18" height="7" rx="1.5"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/>',
+      factory: '<path d="M2 21V11l5 3v-3l5 3v-3l5 3V4h4v17z"/><path d="M6 18h2M11 18h2"/>',
+      home: '<path d="m3 11 9-8 9 8"/><path d="M5 10v11h14V10"/><path d="M10 21v-6h4v6"/>',
+      car: '<path d="M3 17v-5l2.5-5h13l2.5 5v5z"/><path d="M3 12h18"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+      plug: '<path d="M9 2v5M15 2v5"/><path d="M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v5"/>',
+      briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M2 13h20"/>',
+      send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
+      trophy: '<path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+      moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+      sunset: '<path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 10V3M4.2 11.2l1.4 1.4M1 18h2M21 18h2M18.4 12.6l1.4-1.4M23 22H1"/><path d="m15 7-3 3-3-3"/>',
+      sunrise: '<path d="M17 18a5 5 0 0 0-10 0"/><path d="M12 10V3M4.2 11.2l1.4 1.4M1 18h2M21 18h2M18.4 12.6l1.4-1.4M23 22H1"/><path d="m9 6 3-3 3 3"/>',
+      shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+      monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m6 12 3-3 3 2 4-4"/>',
+      clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M8 12h8M8 16h5"/>',
+      search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+      building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+      thermometer: '<path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/>',
+      chart: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+      x: '<path d="M18 6 6 18M6 6l12 12"/>'
+    };
+    function icon(name, size = 16) {
+      return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+    }
+    function hydrateIcons() { document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon, Number(el.dataset.size) || 16); }); }
+
+    /* ---------------- Hình minh họa ---------------- */
+    const C = { navy: '#003366', soft: '#e6eef6', red: '#c00000', redSoft: '#fbeaea', off: '#aab6c3', offFill: '#f4f6f9', text: '#1f2933', muted: '#5b6673', ok: '#15803d', warn: '#b45309' };
+    function glyph(name, x, y, s, color, sw = 2) {
+      return `<svg x="${x}" y="${y}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" class="glyph">${ICONS[name]}</svg>`;
+    }
+    function lines(x, y, txt, size, color, weight = 400, anchor = 'middle', lh = 1.25) {
+      return String(txt).split('\n').map((t, i) => `<text x="${x}" y="${y + i * size * lh}" font-size="${size}" font-weight="${weight}" fill="${color}" text-anchor="${anchor}">${escapeHtml(t)}</text>`).join('');
+    }
+    // Khối thiết bị: khung bo góc + biểu tượng + tên + thông số
+    function block(x, y, w, h, on, ic, title, sub, opt = {}) {
+      const stroke = opt.stroke || (on ? C.navy : C.off), fill = opt.fill || (on ? C.soft : C.offFill);
+      const tc = on ? C.text : C.muted;
+      let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="${opt.thick ? 3 : 2}" ${on ? '' : 'stroke-dasharray="6 5"'}/>`;
+      s += glyph(ic, x + w / 2 - 19, y + 10, 38, on ? (opt.iconColor || C.navy) : C.off);
+      s += lines(x + w / 2, y + 66, title, 13, tc, 700);
+      if (sub) s += lines(x + w / 2, y + 66 + 16 * String(title).split('\n').length, sub, 11.5, on ? (opt.subColor || C.muted) : C.off);
+      if (opt.badge) s += `<rect x="${x + w / 2 - 30}" y="${y - 9}" width="60" height="18" rx="9" fill="${C.red}"/><text x="${x + w / 2}" y="${y + 4}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">${opt.badge}</text>`;
+      return s;
+    }
+    function wire(x1, y1, x2, y2, on, width = 3) {
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on ? C.navy : C.off}" stroke-width="${width}" ${on ? '' : 'stroke-dasharray="7 6"'} stroke-linecap="round"/>`;
+    }
+
+    // Sơ đồ khu đô thị: nguồn lưới → 2 tuyến → trạm → thanh cái → phụ tải, nguồn tại chỗ, (bãi sạc)
+    function sceneCity(sel, opt = {}) {
+      const on = k => !!sel[k];
+      let s = `<svg class="fig" viewBox="0 0 960 360" role="img" aria-label="Sơ đồ cấp điện khu đô thị">`;
+      s += block(20, 30, 150, 130, on('grid'), 'pylon', 'Nguồn lưới', 'tối đa 50 MW tổng');
+      s += wire(170, 78, 320, 78, on('grid'), 4) + lines(245, 68, 'Tuyến 1 · 50 MW', 12, on('grid') ? C.navy : C.muted, 600);
+      s += wire(170, 126, 320, 126, on('line2') && on('grid'), 4) + lines(245, 116, 'Tuyến 2 · 40 MW', 12, on('line2') ? C.navy : C.muted, 600);
+      s += block(320, 30, 140, 130, on('grid'), 'transformer', 'Trạm khu đô thị', 'nhận điện từ 2 tuyến');
+      s += wire(390, 160, 390, 200, on('grid'), 4);
+      s += `<line x1="30" y1="200" x2="945" y2="200" stroke="${C.navy}" stroke-width="7" stroke-linecap="round"/>`;
+      s += lines(190, 190, 'Thanh cái khu đô thị', 11, C.muted, 600, 'start');
+      const loads = [['hospital', 'Bệnh viện', '5 MW', true], ['server', 'Trung tâm\ndữ liệu', '10 MW', true], ['factory', 'Nhà máy', '15 MW', false], ['home', 'Khu dân cư', '10 MW', false]];
+      loads.forEach(([ic, t, mw, pri], i) => {
+        const x = 480 + i * 118;
+        s += wire(x + 52, 160, x + 52, 200, true, 3);
+        s += block(x, 30, 105, 130, true, ic, t, mw, pri ? { stroke: C.red, iconColor: C.red, badge: 'ƯU TIÊN', thick: true } : {});
+      });
+      const locals = [['gen', 'generator', 'Máy phát', '10 MW'], ['pv', 'solar', 'Điện mặt trời', opt.ev ? '0–20 MW' : 'ban đêm 0 MW'], ['bess', 'battery', 'BESS', '10 MW / 20 MWh']];
+      locals.forEach(([k, ic, t, sub], i) => {
+        const x = 40 + i * 140;
+        s += wire(x + 60, 200, x + 60, 240, on(k), 3);
+        s += block(x, 240, 120, 110, on(k), ic, t, sub);
+      });
+      if (opt.ev) {
+        s += wire(560, 200, 560, 240, true, 3);
+        s += `<rect x="480" y="240" width="465" height="110" rx="10" fill="${C.soft}" stroke="${C.navy}" stroke-width="2"/>`;
+        s += glyph('transformer', 500, 262, 38, C.navy) + lines(519, 318, 'MBA 4 MW', 11.5, C.muted, 600);
+        s += lines(560, 268, 'Bãi sạc xe điện có điều khiển', 13, C.text, 700, 'start');
+        for (let i = 0; i < 7; i++) s += glyph('car', 562 + i * 52, 282, 40, C.navy) + glyph('plug', 590 + i * 52, 280, 14, C.red);
+        s += lines(560, 340, 'dùng chung máy biến áp với khu căn hộ', 11.5, C.muted, 400, 'start');
+      } else {
+        s += `<rect x="480" y="240" width="465" height="110" rx="10" fill="#fff" stroke="${C.off}"/>`;
+        s += glyph('moon', 500, 262, 34, C.navy) + lines(550, 276, 'Ba phép kiểm tra đều diễn ra ban đêm', 13, C.text, 700, 'start');
+        s += lines(550, 296, 'PV phát 0 MW; pin chỉ có 20 MWh nên không cấp liên tục cả đêm.', 11.5, C.muted, 400, 'start');
+        s += `<rect x="550" y="314" width="34" height="18" rx="5" fill="${C.soft}" stroke="${C.navy}" stroke-width="2"/>` + lines(592, 327, 'đã chọn', 11.5, C.muted, 400, 'start');
+        s += `<rect x="660" y="314" width="34" height="18" rx="5" fill="${C.offFill}" stroke="${C.off}" stroke-width="2" stroke-dasharray="5 4"/>` + lines(702, 327, 'chưa chọn', 11.5, C.muted, 400, 'start');
+      }
+      return s + '</svg>';
+    }
+
+    // Cấp 2: ai cấp cho tải ưu tiên khi mất nguồn chính + viên pin chia vùng dùng được
+    function sceneOutage(sc, c, r) {
+      const ok = r.okP && r.okE, late = sc.phases[0].genMW === 0;
+      let s = `<svg class="fig" viewBox="0 0 960 230" role="img" aria-label="Sơ đồ cấp điện khi mất nguồn chính và dung lượng pin">`;
+      s += `<defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="${C.navy}"/></marker></defs>`;
+      s += block(20, 15, 140, 100, false, 'pylon', 'Nguồn chính', 'mất điện');
+      s += glyph('x', 68, 22, 44, C.red, 3);
+      s += block(20, 125, 140, 100, true, 'generator', 'Máy phát 10 MW', late ? 'chạy sau 30 phút' : 'chạy ngay', late ? { stroke: C.warn, iconColor: C.warn, subColor: C.warn } : {});
+      s += block(215, 65, 150, 110, true, 'battery', 'BESS', `${c.P} MW / ${fmt(c.E)} MWh`, ok ? {} : { stroke: C.red, iconColor: C.red, subColor: C.red, fill: C.redSoft });
+      s += `<line x1="160" y1="195" x2="405" y2="195" stroke="${C.navy}" stroke-width="3" marker-end="url(#ah2)"/>`;
+      s += `<line x1="365" y1="120" x2="405" y2="120" stroke="${C.navy}" stroke-width="3" marker-end="url(#ah2)"/>`;
+      s += `<rect x="410" y="20" width="185" height="200" rx="10" fill="#fff" stroke="${C.red}" stroke-width="3"/>`;
+      s += glyph('hospital', 445, 32, 36, C.red) + glyph('server', 515, 32, 36, C.red);
+      s += lines(502, 92, 'Tải ưu tiên 15 MW', 13, C.text, 700);
+      let t0 = 0;
+      sc.phases.forEach((ph, i) => {
+        const t1 = t0 + ph.hours;
+        s += lines(422, 118 + i * 44, `${fmt(t0)}–${fmt(t1)} h:`, 11.5, C.muted, 700, 'start');
+        s += lines(422, 134 + i * 44, ph.genMW ? `máy phát ${ph.genMW} + pin ${ph.needMW} MW` : `pin gánh cả ${ph.needMW} MW`, 11.5, ph.genMW ? C.text : C.warn, ph.genMW ? 400 : 700, 'start');
+        t0 = t1;
+      });
+      // Viên pin: 0 → SOC tối thiểu (không dùng), SOC tối thiểu → SOC lúc sự cố (dùng được), phần trên (trống)
+      const bx = 640, by = 62, bw = 260, bh = 86, iw = bw - 8, X = f => bx + 4 + f * iw;
+      s += lines(bx, 34, c.E > 0 ? `Pin bạn chọn: ${c.P} MW / ${fmt(c.E)} MWh` : 'Kéo thanh E để chọn dung lượng pin', 13, C.text, 700, 'start');
+      s += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="12" fill="#fff" stroke="${C.navy}" stroke-width="3"/><rect x="${bx + bw}" y="${by + 28}" width="12" height="30" rx="3" fill="${C.navy}"/>`;
+      if (c.E > 0) {
+        s += `<rect x="${X(0)}" y="${by + 4}" width="${X(sc.socMin) - X(0)}" height="${bh - 8}" rx="8" fill="#c3ccd6"/>`;
+        s += `<rect x="${X(sc.socMin)}" y="${by + 4}" width="${X(sc.socStart) - X(sc.socMin)}" height="${bh - 8}" fill="${r.okE ? C.navy : C.red}"/>`;
+        s += lines((X(sc.socMin) + X(sc.socStart)) / 2, by + bh / 2 + 5, `dùng được ${fmt(r.usable)} MWh`, 13, '#fff', 700);
+        const need = sc.socStart - r.needE / c.E;
+        const nx = X(Math.max(-0.05, need));
+        s += `<line x1="${nx}" y1="${by - 8}" x2="${nx}" y2="${by + bh + 8}" stroke="${r.okE ? C.ok : C.red}" stroke-width="3" stroke-dasharray="5 4"/>`;
+        const lx = Math.min(bx + bw - 80, Math.max(bx + 80, nx));
+        s += lines(lx, by + bh + 24, need >= sc.socMin - 1e-9 ? `xả xong còn ${Math.round(need * 100)}%` : `cần ${fmt(r.needE)} MWh: không đủ`, 11.5, r.okE ? C.ok : C.red, 700);
+      }
+      s += lines(bx, by - 12, `0–${Math.round(sc.socMin * 100)}%: tối thiểu`, 11, C.muted, 400, 'start');
+      s += lines(Math.min(bx + bw, X(sc.socStart) + 30), by - 12, `${Math.round(sc.socStart * 100)}% lúc sự cố`, 11, C.muted, 400, 'end');
+      s += `<rect x="${bx}" y="192" width="14" height="12" fill="#c3ccd6"/>` + lines(bx + 20, 202, 'không được xả', 11, C.muted, 400, 'start');
+      s += `<rect x="${bx + 120}" y="192" width="14" height="12" fill="${C.navy}"/>` + lines(bx + 140, 202, 'năng lượng dùng được', 11, C.muted, 400, 'start');
+      return s + '</svg>';
+    }
+
+    // Cấp 3: đồng hồ tải MBA, bãi xe, thanh năng lượng đã sạc
+    function sceneParking(sc, r) {
+      const worst = r.loads.reduce((a, d, i) => d.pct > r.loads[a].pct ? i : a, 0);
+      const pct = r.maxPct, over = pct > 100 + 1e-9, cx = 140, cy = 160, R = 105, max = 150;
+      const pt = p => { const a = Math.PI * (1 - Math.min(max, p) / max); return [cx + R * Math.cos(a), cy - R * Math.sin(a)]; };
+      const arc = (p1, p2, col) => { const [x1, y1] = pt(p1), [x2, y2] = pt(p2); return `<path d="M${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="18"/>`; };
+      let s = `<svg class="fig" viewBox="0 0 960 215" role="img" aria-label="Tải máy biến áp, bãi xe và năng lượng đã sạc">`;
+      s += arc(0, 100, '#c9d7e6') + arc(100, 150, '#f3c6c6');
+      if (pct > 0) s += arc(0, Math.min(pct, 100), C.navy) + (over ? arc(100, pct, C.red) : '');
+      const [nx, ny] = pt(pct);
+      s += `<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${over ? C.red : C.text}" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="8" fill="${over ? C.red : C.text}"/>`;
+      const [lx, ly] = pt(100);
+      s += lines(lx, ly - 16, '100%', 11, C.red, 700);
+      s += lines(cx, cy + 34, `${pct.toFixed(0)}%`, 26, over ? C.red : C.navy, 700);
+      s += lines(cx, cy + 52, `MBA 4 MW · nặng nhất lúc ${G.LEVEL3.blocks[worst].label}`, 11, C.muted, 600);
+      // Bãi xe: mỗi biểu tượng = 40 xe
+      const n = Math.round(sc.cars / 40);
+      s += lines(330, 30, `Bãi đỗ ${sc.cars} xe · mỗi xe cần 25 kWh`, 13, C.text, 700, 'start');
+      for (let i = 0; i < n; i++) {
+        const x = 330 + (i % 5) * 54, y = 44 + Math.floor(i / 5) * 46;
+        s += glyph('car', x, y, 40, C.navy) + glyph('plug', x + 30, y - 2, 14, C.red);
+      }
+      s += glyph('home', 620, 52, 40, C.muted) + lines(640, 108, 'Tải sinh', 11, C.muted, 600) + lines(640, 122, 'hoạt', 11, C.muted, 600);
+      // Thanh năng lượng
+      const e = r.energyKWh / 1000, need = r.needKWh / 1000, f = Math.min(1, e / need), done = e >= need - 1e-9;
+      const bx = 700, by = 70, bw = 220, bh = 54;
+      s += lines(bx, 50, 'Năng lượng đã sạc trước 6 h', 13, C.text, 700, 'start');
+      s += `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="10" fill="#fff" stroke="${C.navy}" stroke-width="3"/><rect x="${bx + bw}" y="${by + 17}" width="10" height="20" rx="3" fill="${C.navy}"/>`;
+      if (f > 0) s += `<rect x="${bx + 4}" y="${by + 4}" width="${(bw - 8) * f}" height="${bh - 8}" rx="7" fill="${done ? C.ok : C.warn}"/>`;
+      s += lines(bx + bw / 2, by + bh / 2 + 6, `${fmt(e)} / ${fmt(need)} MWh`, 15, f > 0.45 ? '#fff' : C.text, 700);
+      s += lines(bx, by + bh + 24, done ? 'Đủ cho mọi xe' : `Còn thiếu ${fmt(need - e)} MWh`, 12, done ? C.ok : C.warn, 700, 'start');
+      return s + '</svg>';
+    }
+
     /* ---------------- Lưu nháp ---------------- */
     function saveDraft() {
       try {
@@ -698,11 +903,14 @@ var TKCD_GRADER = (function () {
     }
 
     /* ---------------- Cấp 1 ---------------- */
+    const ITEM_ICON = { grid: 'pylon', gen: 'generator', pv: 'solar', bess: 'battery', line2: 'lines' };
     function buildL1() {
       $('l1Items').innerHTML = G.LEVEL1.order.map(k => {
         const it = G.LEVEL1.items[k];
-        return `<label class="item" id="item-${k}"><span class="cost">${it.cost} đ</span><input type="checkbox" data-k="${k}" /><span class="nm">${escapeHtml(it.name)}</span><div class="ds">${escapeHtml(it.desc)}</div></label>`;
+        return `<label class="item" id="item-${k}"><div class="hd"><input type="checkbox" data-k="${k}" /><span class="nm">${icon(ITEM_ICON[k], 20)}${escapeHtml(it.name)}</span><span class="cost">${it.cost} đ</span></div><div class="ds">${escapeHtml(it.desc)}</div></label>`;
       }).join('');
+      $('l1Cust').innerHTML = [['hospital', 'Bệnh viện 5 MW', 1], ['server', 'Trung tâm dữ liệu 10 MW', 1], ['factory', 'Nhà máy 15 MW', 0], ['home', 'Khu dân cư 10 MW', 0]]
+        .map(([ic, t, pri]) => `<span class="${pri ? 'pri' : ''}">${icon(ic, 16)}${t}</span>`).join('');
       $('l1Items').addEventListener('change', e => { const k = e.target.dataset.k; if (k) { state.l1[k] = e.target.checked; renderL1(); refresh(); } });
     }
     function renderL1() {
@@ -713,6 +921,7 @@ var TKCD_GRADER = (function () {
       $('l1Budget').firstElementChild.style.width = Math.min(100, r.cost) + '%';
       $('l1Problems').textContent = r.problems.join(' · ');
       $('l1Checks').innerHTML = r.tests.map(t => checkItem(t.pass, t.name, t.detail)).join('');
+      $('l1Scene').innerHTML = sceneCity(state.l1);
       renderParts('l1', G.gradeL1(state.l1));
     }
 
@@ -751,6 +960,7 @@ var TKCD_GRADER = (function () {
         <tr><td>Chi phí (2 × MW + 1 × MWh)</td><td>${fmt(r.cost)} điểm</td></tr>`;
       $('l2Checks').innerHTML = checkItem(r.okP, 'Đủ công suất', `${c.P} MW so với ${r.needP} MW cần cấp`) + checkItem(r.okE, 'Đủ năng lượng', `${fmt(r.usable)} MWh hữu dụng so với ${fmt(r.needE)} MWh cần cấp`);
       $('l2Chart').innerHTML = socChart(sc, r, c);
+      $('l2Scene').innerHTML = sceneOutage(sc, c, r);
       renderParts('l2', G.gradeL2(curL2, state.l2[curL2]));
     }
     function socChart(sc, r, c) {
@@ -759,7 +969,7 @@ var TKCD_GRADER = (function () {
       const lo = Math.max(-0.5, Math.min(0, ...r.socTrace.map(p => isFinite(p.soc) ? p.soc : -0.5)));
       const x = v => l + v / T * (W - l - rt), y = v => t + (1 - (v - lo) / (1 - lo)) * (H - t - b);
       const bad = !r.okE;
-      let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Đồ thị SOC của pin trong sự cố">`;
+      let s = `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="Đồ thị SOC của pin trong sự cố">`;
       for (let g = 0; g <= 1.0001; g += 0.2) s += `<line x1="${l}" x2="${W - rt}" y1="${y(g)}" y2="${y(g)}" stroke="#e6ebf1"/><text x="${l - 6}" y="${y(g) + 4}" font-size="11" text-anchor="end" fill="#5b6673">${Math.round(g * 100)}%</text>`;
       if (lo < 0) s += `<rect x="${l}" y="${y(0)}" width="${W - l - rt}" height="${y(lo) - y(0)}" fill="#fbeaea"/><text x="${l + 6}" y="${y(lo) - 5}" font-size="11" fill="#c00000">Dưới 0%: pin cạn trước khi hết sự cố</text>`;
       s += `<line x1="${l}" x2="${W - rt}" y1="${y(sc.socMin)}" y2="${y(sc.socMin)}" stroke="#c00000" stroke-dasharray="6 4"/><text x="${l + 6}" y="${y(sc.socMin) - 5}" font-size="11" fill="#c00000">SOC tối thiểu ${Math.round(sc.socMin * 100)}%</text>`;
@@ -783,7 +993,7 @@ var TKCD_GRADER = (function () {
     function buildL3() {
       buildScenButtons($('l3Scen'), G.LEVEL3.scenarios, i => { curL3 = i; renderL3(); });
       $('l3Sliders').innerHTML = G.LEVEL3.blocks.map((b, i) => `
-        <div class="slider"><label>Sạc khung ${b.label} · giá ${fmt(b.price)} <output id="l3out${i}"></output></label>
+        <div class="slider"><label><span>${icon(['sunset', 'moon', 'sunrise'][i], 18)} Sạc khung ${b.label} · giá ${fmt(b.price)}</span> <output id="l3out${i}"></output></label>
         <input type="range" id="l3s${i}" min="0" step="${G.LEVEL3.stepKW}" /><div class="hint" id="l3hint${i}"></div></div>`).join('');
       G.LEVEL3.blocks.forEach((b, i) => $('l3s' + i).addEventListener('input', () => {
         state.l3[curL3] = { kw: G.LEVEL3.blocks.map((_, j) => Number($('l3s' + j).value)) };
@@ -808,6 +1018,7 @@ var TKCD_GRADER = (function () {
       $('l3Checks').innerHTML = checkItem(r.maxPct <= 100 + 1e-9, 'Máy biến áp không quá tải ở mọi khung giờ', `Lớn nhất ${r.maxPct.toFixed(1)} %`)
         + checkItem(r.energyKWh >= r.needKWh - 1e-9, 'Xe sạc đủ trước 6 giờ sáng', `${fmt(r.energyKWh / 1000)} / ${fmt(r.needKWh / 1000)} MWh`);
       $('l3Chart').innerHTML = loadChart(sc, r);
+      $('l3Scene').innerHTML = sceneParking(sc, r);
       $('l3Free').textContent = `So sánh: nếu ${sc.cars} xe cùng cắm sạc tự do lúc 18 giờ, máy biến áp phải mang ${fmt(sc.baseKW[0] / 1000)} + ${fmt(cap / 1000)} = ${fmt((sc.baseKW[0] + cap) / 1000)} MW, tức ${r.freeChargingPct.toFixed(0)} % công suất.`;
       renderParts('l3', G.gradeL3(curL3, state.l3[curL3]));
     }
@@ -816,7 +1027,7 @@ var TKCD_GRADER = (function () {
       const top = Math.max(7000, ...r.loads.map(d => d.totalKW + 400));
       const y = v => t + (1 - v / top) * (H - t - b);
       const lim = G.LEVEL3.transformerKW, n = r.loads.length, slot = (W - l - rt) / n, bw = slot * 0.5;
-      let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tải máy biến áp theo khung giờ">`;
+      let s = `<svg class="fig" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tải máy biến áp theo khung giờ">`;
       for (let g = 0; g <= top; g += 1000) s += `<line x1="${l}" x2="${W - rt}" y1="${y(g)}" y2="${y(g)}" stroke="#e6ebf1"/><text x="${l - 6}" y="${y(g) + 4}" font-size="11" text-anchor="end" fill="#5b6673">${g / 1000} MW</text>`;
       r.loads.forEach((d, i) => {
         const x = l + slot * i + (slot - bw) / 2, over = d.totalKW > lim + 1e-9;
@@ -835,7 +1046,8 @@ var TKCD_GRADER = (function () {
     /* ---------------- Nghề nghiệp ---------------- */
     function buildCareer() {
       const opt = (list, what) => `<option value="">— chọn ${what} —</option>` + list.map((x, i) => `<option value="${i}">${escapeHtml(x)}</option>`).join('');
-      $('careerBody').innerHTML = G.TASKS.map((tk, i) => `<tr><td><b>${i + 1}.</b> ${escapeHtml(tk)}</td>
+      const TASK_ICON = ['transformer', 'shield', 'monitor', 'clipboard', 'search', 'building', 'thermometer', 'chart'];
+      $('careerBody').innerHTML = G.TASKS.map((tk, i) => `<tr><td><span class="task-ic">${icon(TASK_ICON[i], 18)}</span><b>${i + 1}.</b> ${escapeHtml(tk)}</td>
         <td><select data-i="${i}" data-f="role" aria-label="Vai trò cho tình huống ${i + 1}">${opt(G.ROLES, 'vai trò')}</select></td>
         <td><select data-i="${i}" data-f="product" aria-label="Sản phẩm cho tình huống ${i + 1}">${opt(G.PRODUCTS, 'sản phẩm')}</select></td></tr>`).join('');
       $('careerBody').addEventListener('change', e => {
@@ -869,10 +1081,10 @@ var TKCD_GRADER = (function () {
       const todo = (obj) => [1, 2, 3].filter(i => !obj[i]).map(i => 'KB ' + i);
       const st2 = todo(state.l2), st3 = todo(state.l3);
       $('summaryBody').innerHTML =
-        row('Cấp 1 — Chọn hạng mục', G.LEVEL1.order.some(k => state.l1[k]) ? 'Đã chọn' : '<span style="color:var(--warn)">Chưa làm</span>', g.l1.score, 20) +
-        row('Cấp 2 — Định cỡ BESS', st2.length ? `<span style="color:var(--warn)">Chưa làm: ${st2.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l2.total, 30) +
-        row('Cấp 3 — Bãi sạc xe điện', st3.length ? `<span style="color:var(--warn)">Chưa làm: ${st3.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l3.total, 30) +
-        row('Nghề nghiệp', `Đã trả lời ${careerAnswered()}/8`, null, 20);
+        row(`${icon('pylon', 18)} Cấp 1 — Chọn hạng mục`, G.LEVEL1.order.some(k => state.l1[k]) ? 'Đã chọn' : '<span style="color:var(--warn)">Chưa làm</span>', g.l1.score, 20) +
+        row(`${icon('battery', 18)} Cấp 2 — Định cỡ BESS`, st2.length ? `<span style="color:var(--warn)">Chưa làm: ${st2.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l2.total, 30) +
+        row(`${icon('car', 18)} Cấp 3 — Bãi sạc xe điện`, st3.length ? `<span style="color:var(--warn)">Chưa làm: ${st3.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l3.total, 30) +
+        row(`${icon('briefcase', 18)} Nghề nghiệp`, `Đã trả lời ${careerAnswered()}/8`, null, 20);
     }
 
     /* ---------------- Máy chủ ---------------- */
@@ -990,7 +1202,8 @@ var TKCD_GRADER = (function () {
       const shown = rows.filter(r => !term || r.name.toLowerCase().includes(term) || String(r.mssv).toLowerCase().includes(term));
       $('boardBody').innerHTML = shown.length ? shown.map(r => {
         const me = myName && r.name.toLowerCase() === myName && (r.mssv === maskId(rawId) || String(r.mssv).toUpperCase() === rawId);
-        return `<tr class="${me ? 'me' : ''}"><td class="num">${r.rank}</td><td>${escapeHtml(r.name)}${me ? ' <b style="color:var(--navy)">(bạn)</b>' : ''}</td><td>${escapeHtml(r.mssv)}</td><td>${escapeHtml(r.cls)}</td>
+        const medal = ['#d4a017', '#9aa5b1', '#b87333'][r.rank - 1];
+        return `<tr class="${me ? 'me' : ''}"><td class="num">${medal ? `<span class="medal" style="background:${medal}">${r.rank}</span>` : r.rank}</td><td>${escapeHtml(r.name)}${me ? ' <b style="color:var(--navy)">(bạn)</b>' : ''}</td><td>${escapeHtml(r.mssv)}</td><td>${escapeHtml(r.cls)}</td>
           <td class="num">${fmt(r.l1)}</td><td class="num">${fmt(r.l2)}</td><td class="num">${fmt(r.l3)}</td><td class="num">${fmt(r.nn)}</td>
           <td class="num"><span class="pill ${pillClass(r.score, 10)}">${Number(r.score).toFixed(1)}</span>${r.adjusted ? ' <span title="Giảng viên đã điều chỉnh" style="color:var(--warn)">*</span>' : ''}</td>
           <td class="num">${r.count}</td><td>${escapeHtml(r.updated)}</td></tr>`;
@@ -1005,6 +1218,8 @@ var TKCD_GRADER = (function () {
 
     function renderAll() { renderL1(); renderL2(); renderL3(); renderCareer(); refresh(); }
     loadDraft();
+    hydrateIcons();
+    $('heroScene').innerHTML = sceneCity({ grid: true, gen: true, pv: true, bess: true, line2: true }, { ev: true });
     buildL1(); buildL2(); buildL3(); buildCareer();
     renderAll();
   </script>
