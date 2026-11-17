@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kỹ sư thiết kế: cấp điện cho khu đô thị mới</title>
+  <style>
+    :root {
+      --navy: #003366; --navy-soft: #e6eef6; --red: #c00000; --red-soft: #fbeaea;
+      --bg: #f4f6f9; --card: #ffffff; --border: #d6dee8; --text: #1f2933; --muted: #5b6673;
+      --ok: #15803d; --ok-soft: #e7f5ec; --warn: #b45309; --warn-soft: #fdf3e2;
+      --font: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; padding-bottom: 48px; }
+    button, input, select { font: inherit; }
+
+    header { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    header .sub { font-size: .8rem; opacity: .85; }
+    .student { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .student input { border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: #fff; padding: 6px 10px; border-radius: 6px; width: 150px; }
+    .student input::placeholder { color: rgba(255,255,255,.7); }
+    .student input#studentClass { width: 100px; }
+    .est { background: #fff; color: var(--navy); border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: .9rem; white-space: nowrap; }
+
+    nav { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 24px 0; max-width: 1180px; margin: 0 auto; }
+    nav button { border: 1px solid var(--border); border-bottom: none; background: #e9eef4; color: var(--muted); padding: 9px 16px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; font-size: .9rem; }
+    nav button.active { background: var(--card); color: var(--navy); box-shadow: inset 0 3px 0 var(--red); }
+    nav button .pts { font-weight: 400; font-size: .78rem; margin-left: 4px; color: var(--muted); }
+
+    main { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    .panel { display: none; background: var(--card); border: 1px solid var(--border); border-radius: 0 10px 10px 10px; padding: 24px; }
+    .panel.active { display: block; }
+    h2 { color: var(--navy); font-size: 1.3rem; margin-bottom: 4px; }
+    h3 { color: var(--navy); font-size: 1rem; margin: 18px 0 8px; }
+    p.lead { color: var(--muted); margin-bottom: 16px; max-width: 820px; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: #fff; }
+    .story { background: var(--navy-soft); border-radius: 8px; padding: 12px 14px; margin: 12px 0 16px; font-size: .95rem; }
+    .note { font-size: .82rem; color: var(--muted); }
+
+    .scen { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scen button { border: 1px solid var(--navy); background: #fff; color: var(--navy); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: .88rem; }
+    .scen button.active { background: var(--navy); color: #fff; }
+    .scen button .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #c3ccd6; margin-left: 6px; vertical-align: middle; }
+    .scen button .dot.done { background: var(--ok); }
+
+    .slider { margin: 14px 0; }
+    .slider label { display: flex; justify-content: space-between; font-weight: 600; font-size: .92rem; }
+    .slider label output { color: var(--navy); font-variant-numeric: tabular-nums; }
+    .slider input[type=range] { width: 100%; accent-color: var(--navy); margin-top: 6px; }
+    .slider .hint { font-size: .78rem; color: var(--muted); }
+
+    table.kv { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    table.kv td { padding: 6px 4px; border-bottom: 1px solid #edf1f5; }
+    table.kv td:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    .checks { list-style: none; margin-top: 8px; }
+    .checks li { display: flex; gap: 10px; padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; font-size: .92rem; }
+    .checks li.ok { background: var(--ok-soft); }
+    .checks li.bad { background: var(--red-soft); }
+    .checks li .mark { font-weight: 700; width: 18px; flex: none; }
+    .checks li.ok .mark { color: var(--ok); }
+    .checks li.bad .mark { color: var(--red); }
+    .checks li small { display: block; color: var(--muted); }
+
+    .scorebox { margin-top: 14px; border-top: 1px dashed var(--border); padding-top: 12px; }
+    .scorebox .big { font-size: 1.5rem; font-weight: 700; color: var(--navy); }
+    .parts { list-style: none; font-size: .85rem; color: var(--muted); }
+    .parts li { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
+    .parts li b { color: var(--text); white-space: nowrap; }
+
+    .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .item { border: 2px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; display: block; transition: border-color .15s; }
+    .item:hover { border-color: #9fb3c8; }
+    .item.on { border-color: var(--navy); background: var(--navy-soft); }
+    .item input { margin-right: 6px; accent-color: var(--navy); }
+    .item .nm { font-weight: 700; }
+    .item .cost { float: right; color: var(--red); font-weight: 700; }
+    .item .ds { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+    .budget { height: 12px; background: #e6ebf1; border-radius: 6px; overflow: hidden; margin: 6px 0 2px; }
+    .budget div { height: 100%; background: var(--navy); transition: width .2s; }
+    .budget.over div { background: var(--red); }
+    .problems { color: var(--red); font-weight: 600; font-size: .9rem; margin-top: 6px; }
+
+    svg { width: 100%; height: auto; display: block; }
+    svg text { font-family: var(--font); }
+
+    table.tasks { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    table.tasks th { text-align: left; background: var(--navy); color: #fff; padding: 8px; font-weight: 600; }
+    table.tasks td { padding: 8px; border-bottom: 1px solid #e6ebf1; vertical-align: top; }
+    table.tasks select { width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+    table.tasks tr:nth-child(even) td { background: #f8fafc; }
+
+    table.report { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    table.report th { background: var(--navy); color: #fff; text-align: left; padding: 8px; }
+    table.report td { padding: 8px; border-bottom: 1px solid #e6ebf1; }
+    table.report td.num, table.report th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.report tr.me td { background: var(--warn-soft); }
+
+    .btn { border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; cursor: pointer; }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-success { background: var(--ok); color: #fff; }
+    .btn-secondary { background: #e6ebf1; color: var(--text); }
+    .btn:disabled { opacity: .6; cursor: wait; }
+    .pill { display: inline-block; border-radius: 999px; padding: 1px 10px; font-weight: 700; font-size: .85rem; }
+    .pill.full { background: var(--ok-soft); color: var(--ok); }
+    .pill.mid { background: var(--warn-soft); color: var(--warn); }
+    .pill.low { background: var(--red-soft); color: var(--red); }
+
+    .guide ol, .guide ul { margin: 6px 0 6px 22px; }
+    .guide li { margin: 4px 0; }
+
+    .modal-bg { position: fixed; inset: 0; background: rgba(15, 23, 42, .5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    .modal-bg.show { display: flex; }
+    .modal { background: #fff; border-radius: 12px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 22px; }
+    .modal h3 { margin-top: 0; }
+    .modal .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+
+    @media (max-width: 820px) {
+      header, nav, main { padding-left: 16px; padding-right: 16px; }
+      header { position: static; }
+      .grid2 { grid-template-columns: minmax(0, 1fr); }
+      .panel { padding: 16px; border-radius: 10px; }
+      nav button { flex: 1 1 auto; border-radius: 8px; border-bottom: 1px solid var(--border); }
+      .student input, .student input#studentClass { width: calc(50% - 6px); }
+      table.tasks, table.tasks tbody, table.tasks tr, table.tasks td { display: block; width: 100%; }
+      table.tasks thead { display: none; }
+      table.tasks tr { border-bottom: 2px solid var(--border); padding: 6px 0; }
+      table.tasks td { border: none; padding: 4px 0; }
+      .scroll { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Kỹ sư thiết kế: cấp điện cho khu đô thị mới</h1>
+      <div class="sub">Nhập môn Hệ thống điện · Buổi 2 · Bài thực hành chấm tự động</div>
+    </div>
+    <div class="student">
+      <input id="studentName" placeholder="Họ và tên" autocomplete="name" />
+      <input id="studentId" placeholder="MSSV" />
+      <input id="studentClass" placeholder="Lớp" />
+      <span class="est" id="estHeader" title="Điểm dự kiến cấp 1–3; phần nghề nghiệp chấm khi nộp">Dự kiến: 0/80</span>
+    </div>
+  </header>
+
+  <nav id="tabs">
+    <button data-tab="guide" class="active">Hướng dẫn</button>
+    <button data-tab="l1">Cấp 1 <span class="pts" id="tabPts-l1">0/20</span></button>
+    <button data-tab="l2">Cấp 2 <span class="pts" id="tabPts-l2">0/30</span></button>
+    <button data-tab="l3">Cấp 3 <span class="pts" id="tabPts-l3">0/30</span></button>
+    <button data-tab="career">Nghề nghiệp <span class="pts" id="tabPts-career">0/8 câu</span></button>
+    <button data-tab="submit">Nộp bài</button>
+    <button data-tab="board">Bảng điểm</button>
+  </nav>
+
+  <main>
+    <!-- ================= HƯỚNG DẪN ================= -->
+    <section class="panel guide active" id="panel-guide">
+      <h2>Bạn là kỹ sư thiết kế của khu đô thị mới</h2>
+      <p class="lead">Khu đô thị có bệnh viện, trung tâm dữ liệu, nhà máy và khu dân cư, tổng nhu cầu 40 MW. Nhiệm vụ của bạn: chọn nguồn, định cỡ pin lưu trữ, thiết kế cách sạc xe điện, rồi chỉ ra ai trong ngành điện sẽ làm từng phần việc.</p>
+      <div class="grid2">
+        <div class="card">
+          <h3 style="margin-top:0">Bốn phần của bài</h3>
+          <table class="report">
+            <thead><tr><th>Phần</th><th>Nội dung</th><th class="num">Điểm</th></tr></thead>
+            <tbody>
+              <tr><td>Cấp 1</td><td>Chọn hạng mục trong 100 điểm ngân sách, qua 3 phép kiểm tra</td><td class="num">20</td></tr>
+              <tr><td>Cấp 2</td><td>Định cỡ BESS: chọn riêng MW và MWh cho 3 kịch bản sự cố</td><td class="num">30</td></tr>
+              <tr><td>Cấp 3</td><td>Đặt giới hạn sạc xe điện theo khung giờ để không quá tải máy biến áp</td><td class="num">30</td></tr>
+              <tr><td>Nghề nghiệp</td><td>Ghép 8 tình huống của dự án với vai trò kỹ sư và sản phẩm công việc</td><td class="num">20</td></tr>
+              <tr><td colspan="2"><b>Tổng</b> (quy về hệ 10)</td><td class="num"><b>100</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Cách làm và chấm điểm</h3>
+          <ol>
+            <li>Nhập <b>họ tên, MSSV, lớp</b> ở góc trên.</li>
+            <li>Làm lần lượt từng phần. Trang cho biết phương án đã đạt yêu cầu kỹ thuật hay chưa và điểm dự kiến.</li>
+            <li>Mỗi kịch bản được 10 điểm: đạt kỹ thuật trước, sau đó mới xét <b>chi phí so với phương án rẻ nhất</b>.</li>
+            <li>Phần nghề nghiệp <b>chỉ chấm trên máy chủ</b> khi nộp; trang không hiển thị đáp án.</li>
+            <li>Bấm <b>Nộp bài</b>. Máy chủ chấm lại toàn bộ theo đáp án, điểm ở trình duyệt chỉ là dự kiến.</li>
+          </ol>
+          <p class="note">Bài làm được tự lưu trên trình duyệt này. Số lần nộp, hạn nộp và cách tính điểm do giảng viên cài đặt.</p>
+        </div>
+      </div>
+      <h3>Giả thiết chung</h3>
+      <ul>
+        <li>Mọi số liệu, chi phí và giá điện là <b>giả định cho bài học</b>, không phải giá hay thông số thực tế.</li>
+        <li>Bỏ qua tổn hao, thời gian chuyển nguồn (trừ khi kịch bản nêu rõ), điện áp, trào lưu công suất và bảo vệ.</li>
+        <li>Phương án đạt bài này mới thỏa mô hình lớp học, chưa phải một thiết kế kỹ thuật hoàn chỉnh.</li>
+      </ul>
+    </section>
+
+    <!-- ================= CẤP 1 ================= -->
+    <section class="panel" id="panel-l1">
+      <h2>Cấp 1 — Chọn hạng mục trong 100 điểm</h2>
+      <p class="lead">Mỗi hạng mục mua tối đa một lần. Phương án phải qua cả ba phép kiểm tra. Mỗi phép kiểm tra bắt đầu độc lập, pin đầy ở đầu mỗi tình huống, và đều diễn ra <b>ban đêm</b>.</p>
+      <div class="grid2">
+        <div>
+          <div class="items" id="l1Items"></div>
+          <div style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; font-weight:600;"><span>Ngân sách đã dùng</span><span id="l1Cost">0 / 100 điểm</span></div>
+            <div class="budget" id="l1Budget"><div style="width:0"></div></div>
+            <div class="problems" id="l1Problems"></div>
+          </div>
+          <div class="story" style="margin-top:16px;">
+            <b>Bốn nhóm khách hàng:</b> bệnh viện 5 MW và trung tâm dữ liệu 10 MW (ưu tiên, tổng 15 MW); nhà máy 15 MW và khu dân cư 10 MW (được cắt khi mất nguồn chính).
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Ba phép kiểm tra</h3>
+          <ul class="checks" id="l1Checks"></ul>
+          <div class="scorebox"><div class="big" id="l1Score">0 / 20</div><ul class="parts" id="l1Parts"></ul><div class="note" id="l1Note"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CẤP 2 ================= -->
+    <section class="panel" id="panel-l2">
+      <h2>Cấp 2 — Định cỡ BESS: MW và MWh</h2>
+      <p class="lead">Công suất (MW) quyết định pin cấp <b>nhanh</b> đến đâu; dung lượng (MWh) quyết định cấp được <b>bao lâu</b>. Năng lượng dùng được = E × (SOC lúc sự cố − SOC tối thiểu). Chi phí giả định: <b>2 điểm/MW</b> và <b>1 điểm/MWh</b>.</p>
+      <div class="scen" id="l2Scen"></div>
+      <div class="story" id="l2Story"></div>
+      <div class="grid2">
+        <div>
+          <div class="slider"><label>Công suất pin P <output id="l2Pout"></output></label><input type="range" id="l2P" /><div class="hint">0–25 MW, bước 1 MW</div></div>
+          <div class="slider"><label>Dung lượng pin E <output id="l2Eout"></output></label><input type="range" id="l2E" /><div class="hint">0–50 MWh, bước 2,5 MWh</div></div>
+          <table class="kv" id="l2Table"></table>
+          <ul class="checks" id="l2Checks"></ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Trạng thái sạc SOC trong sự cố</h3>
+          <div id="l2Chart"></div>
+          <div class="scorebox"><div class="big" id="l2Score">0 / 10</div><ul class="parts" id="l2Parts"></ul><div class="note" id="l2Note"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CẤP 3 ================= -->
+    <section class="panel" id="panel-l3">
+      <h2>Cấp 3 — Bãi sạc xe điện có điều khiển</h2>
+      <p class="lead">Bãi đỗ dùng chung một máy biến áp phân phối <b>4 MW</b> với khu căn hộ. Mỗi bộ sạc tối đa 7 kW. Đặt giới hạn tổng công suất sạc cho từng khung giờ sao cho máy biến áp không quá tải, xe sạc đủ trước 6 giờ sáng và tiền điện thấp nhất.</p>
+      <div class="scen" id="l3Scen"></div>
+      <div class="story" id="l3Story"></div>
+      <div class="grid2">
+        <div>
+          <div id="l3Sliders"></div>
+          <table class="kv" id="l3Table"></table>
+          <ul class="checks" id="l3Checks"></ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Tải máy biến áp theo khung giờ</h3>
+          <div id="l3Chart"></div>
+          <p class="note" id="l3Free"></p>
+          <div class="scorebox"><div class="big" id="l3Score">0 / 10</div><ul class="parts" id="l3Parts"></ul><div class="note" id="l3Note"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NGHỀ NGHIỆP ================= -->
+    <section class="panel" id="panel-career">
+      <h2>Nghề nghiệp — Ai làm gì trong dự án của bạn?</h2>
+      <p class="lead">Với mỗi tình huống của dự án khu đô thị, chọn <b>vai trò kỹ sư</b> phụ trách và <b>sản phẩm công việc</b> người đó làm ra. Mỗi câu 2,5 điểm (vai trò 1,5 + sản phẩm 1). Có hai vai trò và hai sản phẩm thừa. Phần này chấm trên máy chủ khi nộp bài.</p>
+      <div class="scroll">
+        <table class="tasks">
+          <thead><tr><th style="width:38%">Tình huống</th><th>Vai trò kỹ sư</th><th>Sản phẩm công việc</th></tr></thead>
+          <tbody id="careerBody"></tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px;" id="careerCount"></p>
+    </section>
+
+    <!-- ================= NỘP BÀI ================= -->
+    <section class="panel" id="panel-submit">
+      <h2>Nộp bài</h2>
+      <p class="lead" id="serverStatus">Đang kiểm tra máy chủ nộp bài...</p>
+      <div class="scroll">
+        <table class="report">
+          <thead><tr><th>Phần</th><th>Tình trạng</th><th class="num">Điểm dự kiến</th></tr></thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px;">Lượt nộp đã dùng: <b id="attempts">–</b>. Máy chủ chấm lại toàn bộ từ bài làm; mỗi lần bấm nộp tính một lượt.</p>
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-success" id="submitBtn">Nộp bài cho giảng viên</button>
+        <button class="btn btn-secondary" id="resetBtn">Làm lại từ đầu</button>
+      </div>
+    </section>
+
+    <!-- ================= BẢNG ĐIỂM ================= -->
+    <section class="panel" id="panel-board">
+      <h2>Bảng điểm</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;">
+        <input id="boardSearch" placeholder="Tìm tên hoặc MSSV" style="padding:7px 10px; border:1px solid var(--border); border-radius:6px; flex:1 1 200px;" />
+        <select id="boardClass" style="padding:7px 10px; border:1px solid var(--border); border-radius:6px;"><option value="">Tất cả các lớp</option></select>
+        <button class="btn btn-secondary" id="boardReload">Tải lại</button>
+      </div>
+      <div class="scroll">
+        <table class="report">
+          <thead><tr><th class="num">#</th><th>Họ và tên</th><th>MSSV</th><th>Lớp</th><th class="num">Cấp 1</th><th class="num">Cấp 2</th><th class="num">Cấp 3</th><th class="num">Nghề</th><th class="num">Điểm</th><th class="num">Lần</th><th>Cập nhật</th></tr></thead>
+          <tbody id="boardBody"><tr><td colspan="11" style="text-align:center; color:var(--muted);">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+      <p class="note" id="boardStats" style="margin-top:8px;"></p>
+    </section>
+  </main>
+
+  <div class="modal-bg" id="modalBg"><div class="modal"><h3 id="modalTitle"></h3><div id="modalBody"></div><div class="actions" id="modalActions"></div></div></div>
+
+  <script>
+/* <<TKCD_GRADER_BEGIN>> */
+/* =====================================================================
+   TKCD_GRADER — MÔ HÌNH TÍNH TOÁN & ĐÁP ÁN CHẤM TỰ ĐỘNG
+   Bài thực hành buổi 2: "Kỹ sư thiết kế: cấp điện cho khu đô thị mới"
+   Khối mã này được chép vào index.html (trình duyệt) và apps-script/Code.gs
+   (máy chủ) bởi tools/build.py. Phần nằm giữa hai marker SERVER_ONLY chỉ có
+   ở máy chủ: trang web không chứa đáp án phần nghề nghiệp.
+   Máy chủ tự chấm lại toàn bộ từ bài làm thô, sinh viên không sửa được điểm.
+   Mọi số liệu là giả định cho bài học, không phải giá hay thông số thực tế.
+   ===================================================================== */
+var TKCD_GRADER = (function () {
+  var VERSION = '2026.11';
+  var EPS = 1e-9;
+
+  /* ---------------- Cấp 1: chọn hạng mục trong 100 điểm (slide 101–110) ---------------- */
+  var LEVEL1 = {
+    budget: 100, loadNight: 40, priorityLoad: 15, outageHours: 2,
+    items: {
+      grid: { name: 'Nguồn lưới + tuyến 1', cost: 35, desc: 'Khả năng cấp tối đa 50 MW. Đây là nguồn chính.' },
+      gen: { name: 'Máy phát tại chỗ', cost: 20, desc: '10 MW khả dụng, đủ nhiên liệu, cấp được tải ưu tiên khi tách lưới.' },
+      pv: { name: 'Điện mặt trời (PV)', cost: 15, desc: 'Tối đa 20 MW ban ngày; ban đêm 0 MW.' },
+      bess: { name: 'BESS 10 MW / 20 MWh', cost: 15, desc: 'Pin đầy ở đầu mỗi tình huống; 20 MWh dùng được tại đầu ra.' },
+      line2: { name: 'Tuyến cấp thứ hai', cost: 15, desc: '40 MW, đi độc lập nhưng dùng chung nguồn phía trên (tổng ≤ 50 MW). Chỉ mua khi đã có nguồn lưới.' }
+    },
+    order: ['grid', 'gen', 'pv', 'bess', 'line2']
+  };
+
+  function computeL1(c) {
+    var it = LEVEL1.items, cost = 0;
+    LEVEL1.order.forEach(function (k) { if (c[k]) cost += it[k].cost; });
+    var problems = [];
+    if (cost > LEVEL1.budget) problems.push('Vượt ngân sách ' + LEVEL1.budget + ' điểm');
+    if (c.line2 && !c.grid) problems.push('Tuyến 2 chỉ được mua khi đã chọn nguồn lưới + tuyến 1');
+    var genMW = c.gen ? 10 : 0, bessMW = c.bess ? 10 : 0;
+
+    // Phép thử 1: đêm bình thường, 40 MW liên tục từ nguồn bền vững (BESS và PV không tính)
+    var t1Sup = c.grid ? 50 : 0;
+    var t1 = { name: 'Đêm bình thường: cấp 40 MW liên tục', pass: t1Sup >= 40,
+      detail: c.grid ? 'Lưới cấp 40 MW ≤ 50 MW' : 'Không có nguồn chính. Máy phát chỉ 10 MW; pin có năng lượng hữu hạn và PV bằng 0 ban đêm' };
+
+    // Phép thử 2: mất tuyến 1 ban đêm, vẫn cấp 40 MW liên tục
+    var t2Sup = (c.grid && c.line2 ? 40 : 0) + genMW;
+    var t2 = { name: 'Mất tuyến 1 ban đêm: vẫn cấp 40 MW', pass: t2Sup >= 40 - EPS,
+      detail: c.grid && c.line2 ? 'Tuyến 2 mang 40 MW ≤ 40 MW' : 'Chỉ còn ' + t2Sup + ' MW nguồn liên tục < 40 MW (pin không cấp liên tục cả đêm)' };
+
+    // Phép thử 3: mất nguồn chính ban đêm, cấp 15 MW ưu tiên trong 2 giờ (cả hai tuyến cùng mất)
+    var need = LEVEL1.priorityLoad, bessNeed = Math.max(0, need - genMW);
+    var okP = genMW + bessMW >= need - EPS;
+    var okE = bessNeed === 0 || (c.bess && bessNeed * LEVEL1.outageHours <= 20 + EPS);
+    var t3detail;
+    if (!okP) t3detail = 'Công suất tại chỗ ' + (genMW + bessMW) + ' MW < 15 MW (cả hai tuyến đều mất điện khi mất nguồn chung)';
+    else t3detail = 'Máy phát ' + genMW + ' MW + pin ' + bessNeed + ' MW; pin cần ' + (bessNeed * 2) + ' MWh ≤ 20 MWh';
+    var t3 = { name: 'Mất nguồn chính ban đêm: 15 MW trong 2 giờ', pass: okP && okE, detail: t3detail };
+
+    return { cost: cost, valid: problems.length === 0, problems: problems, tests: [t1, t2, t3] };
+  }
+
+  var l1Best = null;
+  function benchmarkL1() {
+    if (l1Best !== null) return l1Best;
+    var best = Infinity;
+    for (var m = 0; m < 32; m++) {
+      var c = {};
+      LEVEL1.order.forEach(function (k, i) { c[k] = !!(m & (1 << i)); });
+      var r = computeL1(c);
+      if (r.valid && r.tests.every(function (t) { return t.pass; }) && r.cost < best) best = r.cost;
+    }
+    l1Best = best;
+    return best;
+  }
+
+  /* ---------------- Cấp 2: định cỡ BESS — MW và MWh (slide 66–67) ---------------- */
+  var LEVEL2 = {
+    pricePerMW: 2, pricePerMWh: 1,           // điểm chi phí giả định
+    limits: { P: [0, 25, 1], E: [0, 50, 2.5] },
+    scenarios: {
+      1: { name: 'KB 2.1: Mất nguồn chính 3 giờ', socStart: 0.9, socMin: 0.1,
+           story: 'Tải ưu tiên 15 MW. Máy phát 10 MW chạy ngay; pin bù phần còn thiếu trong 3 giờ. Pin đang ở SOC 90%, chỉ được xả đến SOC 10%.',
+           phases: [{ hours: 3, genMW: 10, needMW: 5 }] },
+      2: { name: 'KB 2.2: Máy phát cần 30 phút để khởi động', socStart: 0.9, socMin: 0.1,
+           story: 'Mất nguồn chính 3 giờ. Trong 30 phút đầu máy phát chưa chạy, pin phải gánh toàn bộ 15 MW; sau đó máy phát cấp 10 MW, pin bù 5 MW. SOC đầu 90%, tối thiểu 10%.',
+           phases: [{ hours: 0.5, genMW: 0, needMW: 15 }, { hours: 2.5, genMW: 10, needMW: 5 }] },
+      3: { name: 'KB 2.3: Pin chỉ còn SOC 60% khi sự cố xảy ra', socStart: 0.6, socMin: 0.1,
+           story: 'Mất nguồn chính 2 giờ, máy phát 10 MW chạy ngay, pin bù 5 MW. Lúc sự cố pin chỉ còn SOC 60% (đã dùng cho việc khác), vẫn chỉ được xả đến SOC 10%.',
+           phases: [{ hours: 2, genMW: 10, needMW: 5 }] }
+    }
+  };
+
+  function computeL2(sc, c) {
+    var needP = 0, needE = 0, t = 0, soc = sc.socStart, socTrace = [{ t: 0, soc: soc }];
+    var usableFrac = sc.socStart - sc.socMin;
+    sc.phases.forEach(function (ph) {
+      needP = Math.max(needP, ph.needMW);
+      needE += ph.needMW * ph.hours;
+      t += ph.hours;
+      soc = c.E > 0 ? soc - (ph.needMW * ph.hours) / c.E : -Infinity;
+      socTrace.push({ t: t, soc: soc });
+    });
+    var usable = c.E * usableFrac;
+    return {
+      needP: needP, needE: needE, usable: usable, usableFrac: usableFrac, socTrace: socTrace,
+      okP: c.P >= needP - EPS, okE: usable >= needE - EPS,
+      cost: c.P * LEVEL2.pricePerMW + c.E * LEVEL2.pricePerMWh,
+      minE: needE / usableFrac
+    };
+  }
+
+  function benchmarkL2(id) {
+    var sc = LEVEL2.scenarios[id], step = LEVEL2.limits.E[2];
+    var r = computeL2(sc, { P: 0, E: 1 });
+    var E = Math.ceil(r.minE / step - EPS) * step;
+    return { P: r.needP, E: E, cost: r.needP * LEVEL2.pricePerMW + E * LEVEL2.pricePerMWh };
+  }
+
+  /* ---------------- Cấp 3: bãi sạc xe điện có điều khiển (slide 69) ---------------- */
+  var LEVEL3 = {
+    transformerKW: 4000, kWhPerCar: 25, chargerKW: 7, stepKW: 50,
+    blocks: [{ label: '18–22 h', hours: 4, price: 3 }, { label: '22–02 h', hours: 4, price: 1 }, { label: '02–06 h', hours: 4, price: 1.5 }],
+    scenarios: {
+      1: { name: 'KB 3.1: 400 xe, đêm bình thường', cars: 400, baseKW: [3000, 1500, 1000],
+           story: '400 xe về bãi lúc 18 giờ, mỗi xe cần 25 kWh trước 6 giờ sáng. Bãi sạc dùng chung máy biến áp 4 MW với khu căn hộ.' },
+      2: { name: 'KB 3.2: 600 xe', cars: 600, baseKW: [3000, 1500, 1000],
+           story: 'Khu đô thị có thêm cư dân: 600 xe, mỗi xe vẫn cần 25 kWh trước 6 giờ sáng. Máy biến áp vẫn 4 MW.' },
+      3: { name: 'KB 3.3: Đêm nắng nóng', cars: 400, baseKW: [3000, 2500, 1000],
+           story: '400 xe như KB 3.1, nhưng đêm nắng nóng nên điều hòa chạy muộn: tải sinh hoạt 22–02 h tăng từ 1,5 lên 2,5 MW.' }
+    }
+  };
+
+  function chargerCapKW(sc) { return sc.cars * LEVEL3.chargerKW; }
+
+  function computeL3(sc, c) {
+    var loads = [], energy = 0, cost = 0, maxPct = 0;
+    LEVEL3.blocks.forEach(function (b, i) {
+      var kw = c.kw[i];
+      var total = sc.baseKW[i] + kw;
+      var pct = total / LEVEL3.transformerKW * 100;
+      maxPct = Math.max(maxPct, pct);
+      energy += kw * b.hours;                       // kWh
+      cost += kw * b.hours / 1000 * b.price;        // MWh × giá
+      loads.push({ baseKW: sc.baseKW[i], chargeKW: kw, totalKW: total, pct: pct });
+    });
+    var needKWh = sc.cars * LEVEL3.kWhPerCar;
+    var free = Math.min(chargerCapKW(sc), needKWh / LEVEL3.blocks[0].hours);
+    return {
+      loads: loads, energyKWh: energy, needKWh: needKWh, cost: cost, maxPct: maxPct,
+      freeChargingPct: (sc.baseKW[0] + chargerCapKW(sc)) / LEVEL3.transformerKW * 100, freeKW: free
+    };
+  }
+
+  // Tối ưu: mọi bước 50 kW trong 4 giờ cho cùng năng lượng, nên lấp khung rẻ trước là tối ưu
+  function benchmarkL3(id) {
+    var sc = LEVEL3.scenarios[id], step = LEVEL3.stepKW, cap = chargerCapKW(sc);
+    var order = [0, 1, 2].sort(function (a, b) { return LEVEL3.blocks[a].price - LEVEL3.blocks[b].price; });
+    var left = sc.cars * LEVEL3.kWhPerCar, kw = [0, 0, 0];
+    order.forEach(function (i) {
+      if (left <= 0) return;
+      var room = Math.floor(Math.min(cap, LEVEL3.transformerKW - sc.baseKW[i]) / step) * step;
+      var want = Math.ceil(left / LEVEL3.blocks[i].hours / step - EPS) * step;
+      kw[i] = Math.max(0, Math.min(room, want));
+      left -= kw[i] * LEVEL3.blocks[i].hours;
+    });
+    return { kw: kw, cost: computeL3(sc, { kw: kw }).cost, feasible: left <= EPS };
+  }
+
+  /* ---------------- Phần 4: ai làm gì trong dự án? (slide 72–87) ---------------- */
+  var ROLES = [
+    'Kỹ sư quy hoạch', 'Kỹ sư thiết kế trạm', 'Điều độ viên', 'Kỹ sư vận hành', 'Kỹ sư bảo vệ rơle',
+    'Kỹ sư phân tích sự cố', 'Kỹ sư SCADA/EMS', 'Kỹ sư phương thức', 'Kỹ sư thiết kế điện công trình (MEP)', 'Kỹ sư xây lắp, QA/QC'
+  ];
+  var PRODUCTS = [
+    'Sơ đồ một sợi, danh mục thiết bị và thuyết minh tính toán',
+    'Bảng chỉnh định và báo cáo kiểm tra phối hợp bảo vệ',
+    'Danh sách tín hiệu và kịch bản kiểm thử chức năng',
+    'Phương án vận hành có điều kiện và biện pháp xử lý',
+    'Báo cáo trình tự sự cố và nguyên nhân gốc',
+    'Sơ đồ cấp điện, bảng phụ tải và hồ sơ phối hợp MEP',
+    'Nhật ký vận hành để bàn giao ca',
+    'Kịch bản phụ tải có giả thiết và phân tích độ nhạy',
+    'Biên bản nghiệm thu và hồ sơ QA/QC',
+    'Lệnh điều độ thời gian thực'
+  ];
+  var TASKS = [
+    'Chọn sơ đồ nối điện và thiết bị cho trạm nhận điện của khu đô thị (tuyến 1, tuyến 2).',
+    'Cài đặt để khi tuyến 1 sự cố chỉ tuyến 1 bị cắt, tuyến 2 vẫn tiếp tục cấp điện.',
+    'Đưa tín hiệu SOC của BESS và công suất bãi sạc về màn hình giám sát của trung tâm.',
+    'Chuẩn bị trước tình huống mất tuyến 1: tải nào giữ, nguồn nào huy động, điều kiện thực hiện.',
+    'Sau một lần bãi sạc mất điện, dựng lại diễn biến và tìm vì sao máy cắt tác động.',
+    'Tính phụ tải và chọn cáp, thiết bị bảo vệ cho bãi đỗ xe trong tòa căn hộ.',
+    'Theo dõi BESS trong ca trực, ghi lại cảnh báo nhiệt độ pin để ca sau nắm được.',
+    'Ước tính đến năm 2035 khu đô thị cần thêm bao nhiêu MW cho xe điện.'
+  ];
+  var POINTS_ROLE = 1.5, POINTS_PRODUCT = 1;
+
+  var CAREER_KEY = null;
+
+  function gradeCareer(ans) {
+    var maxPts = TASKS.length * (POINTS_ROLE + POINTS_PRODUCT);
+    if (!CAREER_KEY) return { score: null, max: maxPts, pending: true, answered: countAnswered(ans) };
+    var score = 0, items = [];
+    TASKS.forEach(function (t, i) {
+      var a = (ans && ans[i]) || {};
+      var okR = a.role !== '' && a.role != null && Number(a.role) === CAREER_KEY[i][0];
+      var okP = a.product !== '' && a.product != null && Number(a.product) === CAREER_KEY[i][1];
+      var pts = (okR ? POINTS_ROLE : 0) + (okP ? POINTS_PRODUCT : 0);
+      score += pts;
+      items.push({ task: i + 1, roleOk: okR, productOk: okP, pts: pts });
+    });
+    return { score: score, max: maxPts, items: items, answered: countAnswered(ans) };
+  }
+
+  function countAnswered(ans) {
+    var n = 0;
+    TASKS.forEach(function (t, i) { var a = ans && ans[i]; if (a && a.role !== '' && a.role != null && a.product !== '' && a.product != null) n++; });
+    return n;
+  }
+
+  /* ---------------- Kiểm tra & chuẩn hóa bài làm thô ---------------- */
+  function snap(v, lo, hi, step) {
+    v = Number(v);
+    if (!isFinite(v) || v < lo - step / 2 || v > hi + step / 2) return null;
+    v = lo + Math.round((v - lo) / step) * step;
+    return Math.round(Math.min(hi, Math.max(lo, v)) * 1000) / 1000;
+  }
+
+  function sanitize(raw) {
+    raw = raw || {};
+    var out = { l1: {}, l2: {}, l3: {}, career: [] };
+    LEVEL1.order.forEach(function (k) { out.l1[k] = !!(raw.l1 && raw.l1[k] === true); });
+    [1, 2, 3].forEach(function (id) {
+      var r = raw.l2 && raw.l2[id];
+      var P = r ? snap(r.P, LEVEL2.limits.P[0], LEVEL2.limits.P[1], LEVEL2.limits.P[2]) : null;
+      var E = r ? snap(r.E, LEVEL2.limits.E[0], LEVEL2.limits.E[1], LEVEL2.limits.E[2]) : null;
+      out.l2[id] = (P === null || E === null) ? null : { P: P, E: E };
+      var q = raw.l3 && raw.l3[id], sc = LEVEL3.scenarios[id];
+      var kw = q && Array.isArray(q.kw) && q.kw.length === 3
+        ? q.kw.map(function (v) { return snap(v, 0, chargerCapKW(sc), LEVEL3.stepKW); }) : null;
+      out.l3[id] = (!kw || kw.some(function (v) { return v === null; })) ? null : { kw: kw };
+    });
+    TASKS.forEach(function (t, i) {
+      var a = raw.career && raw.career[i];
+      var role = a ? parseInt(a.role, 10) : NaN, product = a ? parseInt(a.product, 10) : NaN;
+      out.career.push({
+        role: role >= 0 && role < ROLES.length ? role : '',
+        product: product >= 0 && product < PRODUCTS.length ? product : ''
+      });
+    });
+    return out;
+  }
+
+  function tier(value, steps) {
+    for (var i = 0; i < steps.length; i++) if (value <= steps[i][0] + EPS) return steps[i][1];
+    return 0;
+  }
+
+  /* ---------------- Chấm ---------------- */
+  function gradeL1(c) {
+    var r = computeL1(c), opt = benchmarkL1();
+    if (!LEVEL1.order.some(function (k) { return c[k]; })) return { score: 0, max: 20, parts: [], note: 'Chưa chọn hạng mục nào' };
+    if (!r.valid) return { score: 0, max: 20, parts: [{ label: r.problems.join('; '), pts: 0, max: 20 }], note: 'Phương án không hợp lệ' };
+    var parts = r.tests.map(function (t) { return { label: t.name, pts: t.pass ? 5 : 0, max: 5 }; });
+    var allPass = r.tests.every(function (t) { return t.pass; });
+    var pCost = allPass ? (r.cost <= opt ? 5 : 2) : 0;
+    parts.push({ label: 'Chi phí ' + r.cost + ' điểm (tối ưu ' + opt + ')', pts: pCost, max: 5 });
+    var score = 0; parts.forEach(function (p) { score += p.pts; });
+    return { score: score, max: 20, parts: parts, note: allPass ? '' : 'Chưa qua đủ 3 phép kiểm tra nên chỉ xét điểm chi phí khi đạt cả ba' };
+  }
+
+  function gradeL2(id, c) {
+    if (!c) return { score: 0, max: 10, parts: [], note: 'Chưa làm kịch bản này' };
+    var sc = LEVEL2.scenarios[id], r = computeL2(sc, c), opt = benchmarkL2(id);
+    var parts = [
+      { label: 'Công suất ' + c.P + ' MW (cần ≥ ' + r.needP + ' MW)', pts: r.okP ? 4 : 0, max: 4 },
+      { label: 'Năng lượng hữu dụng ' + fmt(r.usable) + ' MWh (cần ≥ ' + fmt(r.needE) + ' MWh)', pts: r.okE ? 3 : 0, max: 3 }
+    ];
+    var pc = (r.okP && r.okE) ? tier(r.cost / opt.cost, [[1, 3], [1.15, 2], [1.3, 1]]) : 0;
+    parts.push({ label: 'Chi phí ' + fmt(r.cost) + ' (tối ưu ' + fmt(opt.cost) + ')', pts: pc, max: 3 });
+    return finish(parts, (r.okP && r.okE) ? '' : 'Chưa đủ công suất hoặc năng lượng nên không xét điểm chi phí');
+  }
+
+  function gradeL3(id, c) {
+    if (!c) return { score: 0, max: 10, parts: [], note: 'Chưa làm kịch bản này' };
+    var sc = LEVEL3.scenarios[id], r = computeL3(sc, c), opt = benchmarkL3(id);
+    var pLoad = tier(r.maxPct, [[100, 4], [110, 2]]);
+    var ratio = r.energyKWh / r.needKWh;
+    var pE = ratio >= 1 - EPS ? 3 : (ratio >= 0.9 ? 1 : 0);
+    var parts = [
+      { label: 'MBA mang tải lớn nhất ' + r.maxPct.toFixed(1) + ' % (≤ 100 %)', pts: pLoad, max: 4 },
+      { label: 'Sạc được ' + fmt(r.energyKWh / 1000) + ' MWh (cần ' + fmt(r.needKWh / 1000) + ' MWh)', pts: pE, max: 3 }
+    ];
+    var full = pLoad === 4 && pE === 3;
+    var pc = full ? tier(r.cost / opt.cost, [[1, 3], [1.1, 2], [1.25, 1]]) : 0;
+    parts.push({ label: 'Chi phí điện ' + fmt(r.cost) + ' (tối ưu ' + fmt(opt.cost) + ')', pts: pc, max: 3 });
+    return finish(parts, full ? '' : 'Còn quá tải hoặc chưa sạc đủ nên không xét điểm chi phí');
+  }
+
+  function finish(parts, note) {
+    var s = 0; parts.forEach(function (p) { s += p.pts; });
+    return { score: Math.max(0, Math.min(10, s)), max: 10, parts: parts, note: note };
+  }
+
+  function fmt(x) { return (Math.round(x * 100) / 100).toLocaleString('vi-VN'); }
+
+  // answers: { l1:{grid,gen,pv,bess,line2}, l2:{1:{P,E},...}, l3:{1:{kw:[a,b,c]},...}, career:[{role,product},...] }
+  function gradeSubmission(raw) {
+    var a = sanitize(raw);
+    var res = { version: VERSION, l1: gradeL1(a.l1), l2: { total: 0, max: 30, scenarios: {} }, l3: { total: 0, max: 30, scenarios: {} } };
+    [1, 2, 3].forEach(function (id) {
+      var g2 = gradeL2(id, a.l2[id]); res.l2.scenarios[id] = g2; res.l2.total += g2.score;
+      var g3 = gradeL3(id, a.l3[id]); res.l3.scenarios[id] = g3; res.l3.total += g3.score;
+    });
+    res.career = gradeCareer(a.career);
+    res.total100 = res.l1.score + res.l2.total + res.l3.total + (res.career.score || 0);
+    res.score10 = Math.round(res.total100) / 10;
+    return res;
+  }
+
+  return {
+    VERSION: VERSION, LEVEL1: LEVEL1, LEVEL2: LEVEL2, LEVEL3: LEVEL3,
+    ROLES: ROLES, PRODUCTS: PRODUCTS, TASKS: TASKS, POINTS_ROLE: POINTS_ROLE, POINTS_PRODUCT: POINTS_PRODUCT,
+    computeL1: computeL1, computeL2: computeL2, computeL3: computeL3, chargerCapKW: chargerCapKW,
+    benchmarkL1: benchmarkL1, benchmarkL2: benchmarkL2, benchmarkL3: benchmarkL3,
+    sanitize: sanitize, gradeL1: gradeL1, gradeL2: gradeL2, gradeL3: gradeL3, gradeCareer: gradeCareer,
+    gradeSubmission: gradeSubmission, fmt: fmt
+  };
+})();
+/* <<TKCD_GRADER_END>> */
+  </script>
+  <script>
+    // URL ứng dụng web Apps Script (dạng https://script.google.com/macros/s/.../exec). Để trống = chưa kết nối.
+    const SUBMIT_API_URL = 'https://script.google.com/macros/s/AKfycbxlXrt3-uq34LfNQx8p05OQvoPF-DREGWZ4rDxl42sB23mQcab6fS6BcOTxr8485SjWsQ/exec';
+    const G = TKCD_GRADER;
+    const DRAFT_KEY = 'tkcd-draft-' + G.VERSION;
+
+    let state = freshState();
+    let curL2 = 1, curL3 = 1, serverInfo = null, boardRows = [];
+
+    function freshState() {
+      return { l1: { grid: false, gen: false, pv: false, bess: false, line2: false }, l2: { 1: null, 2: null, 3: null }, l3: { 1: null, 2: null, 3: null }, career: G.TASKS.map(() => ({ role: '', product: '' })) };
+    }
+
+    const $ = id => document.getElementById(id);
+    const fmt = x => G.fmt(x);
+    function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function pillClass(s, max) { const r = s / max; return r >= .8 ? 'full' : r >= .5 ? 'mid' : 'low'; }
+
+    /* ---------------- Lưu nháp ---------------- */
+    function saveDraft() {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ state, student: { name: $('studentName').value, mssv: $('studentId').value, cls: $('studentClass').value } }));
+      } catch (e) { /* trình duyệt chặn lưu trữ: bỏ qua */ }
+    }
+    function loadDraft() {
+      try {
+        const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+        if (!d) return;
+        const s = freshState();
+        Object.assign(s.l1, d.state.l1 || {});
+        [1, 2, 3].forEach(i => { s.l2[i] = (d.state.l2 || {})[i] || null; s.l3[i] = (d.state.l3 || {})[i] || null; });
+        (d.state.career || []).forEach((a, i) => { if (s.career[i]) s.career[i] = { role: a.role ?? '', product: a.product ?? '' }; });
+        state = s;
+        $('studentName').value = d.student?.name || ''; $('studentId').value = d.student?.mssv || ''; $('studentClass').value = d.student?.cls || '';
+      } catch (e) { /* nháp hỏng hoặc không đọc được: bắt đầu mới */ }
+    }
+
+    /* ---------------- Tab ---------------- */
+    function switchTab(name) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+      if (name === 'submit') { renderSummary(); loadServerInfo(); }
+      if (name === 'board') loadBoard();
+    }
+    $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) switchTab(b.dataset.tab); });
+
+    // Trước khi nộp không hiện chi phí tối ưu, để sinh viên tự tìm phương án rẻ nhất
+    const hideOptimum = s => s.replace(/\s*\(tối ưu [^)]*\)/, '');
+    function renderParts(prefix, g) {
+      $(prefix + 'Score').textContent = `${fmt(g.score)} / ${g.max}`;
+      $(prefix + 'Parts').innerHTML = g.parts.map(p => `<li><span>${escapeHtml(hideOptimum(p.label))}</span><b>${fmt(p.pts)}/${p.max}</b></li>`).join('');
+      $(prefix + 'Note').textContent = g.note || '';
+    }
+    function checkItem(ok, title, detail) {
+      return `<li class="${ok ? 'ok' : 'bad'}"><span class="mark">${ok ? '✓' : '✗'}</span><span>${escapeHtml(title)}${detail ? `<small>${escapeHtml(detail)}</small>` : ''}</span></li>`;
+    }
+
+    /* ---------------- Cấp 1 ---------------- */
+    function buildL1() {
+      $('l1Items').innerHTML = G.LEVEL1.order.map(k => {
+        const it = G.LEVEL1.items[k];
+        return `<label class="item" id="item-${k}"><span class="cost">${it.cost} đ</span><input type="checkbox" data-k="${k}" /><span class="nm">${escapeHtml(it.name)}</span><div class="ds">${escapeHtml(it.desc)}</div></label>`;
+      }).join('');
+      $('l1Items').addEventListener('change', e => { const k = e.target.dataset.k; if (k) { state.l1[k] = e.target.checked; renderL1(); refresh(); } });
+    }
+    function renderL1() {
+      const r = G.computeL1(state.l1);
+      G.LEVEL1.order.forEach(k => { $('item-' + k).classList.toggle('on', state.l1[k]); $('item-' + k).querySelector('input').checked = state.l1[k]; });
+      $('l1Cost').textContent = `${r.cost} / ${G.LEVEL1.budget} điểm`;
+      $('l1Budget').classList.toggle('over', r.cost > G.LEVEL1.budget);
+      $('l1Budget').firstElementChild.style.width = Math.min(100, r.cost) + '%';
+      $('l1Problems').textContent = r.problems.join(' · ');
+      $('l1Checks').innerHTML = r.tests.map(t => checkItem(t.pass, t.name, t.detail)).join('');
+      renderParts('l1', G.gradeL1(state.l1));
+    }
+
+    /* ---------------- Cấp 2 ---------------- */
+    function buildScenButtons(el, scenarios, onPick) {
+      el.innerHTML = [1, 2, 3].map(i => `<button data-i="${i}">${escapeHtml(scenarios[i].name)}<span class="dot"></span></button>`).join('');
+      el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) onPick(Number(b.dataset.i)); });
+    }
+    function markScen(el, cur, done) {
+      el.querySelectorAll('button').forEach(b => {
+        const i = Number(b.dataset.i);
+        b.classList.toggle('active', i === cur);
+        b.querySelector('.dot').classList.toggle('done', done(i));
+      });
+    }
+    function buildL2() {
+      const L = G.LEVEL2.limits;
+      Object.assign($('l2P'), { min: L.P[0], max: L.P[1], step: L.P[2] });
+      Object.assign($('l2E'), { min: L.E[0], max: L.E[1], step: L.E[2] });
+      buildScenButtons($('l2Scen'), G.LEVEL2.scenarios, i => { curL2 = i; renderL2(); });
+      const onInput = () => { state.l2[curL2] = { P: Number($('l2P').value), E: Number($('l2E').value) }; renderL2(); refresh(); };
+      $('l2P').addEventListener('input', onInput); $('l2E').addEventListener('input', onInput);
+    }
+    function renderL2() {
+      const sc = G.LEVEL2.scenarios[curL2], c = state.l2[curL2] || { P: 0, E: 0 };
+      markScen($('l2Scen'), curL2, i => !!state.l2[i]);
+      $('l2Story').textContent = sc.story;
+      $('l2P').value = c.P; $('l2E').value = c.E;
+      $('l2Pout').textContent = c.P + ' MW'; $('l2Eout').textContent = fmt(c.E) + ' MWh';
+      const r = G.computeL2(sc, c);
+      $('l2Table').innerHTML = `
+        <tr><td>Công suất pin phải cấp lớn nhất</td><td>${r.needP} MW</td></tr>
+        <tr><td>Năng lượng pin phải cấp</td><td>${fmt(r.needE)} MWh</td></tr>
+        <tr><td>Phần dung lượng dùng được (SOC ${Math.round(sc.socStart * 100)}% → ${Math.round(sc.socMin * 100)}%)</td><td>${Math.round(r.usableFrac * 100)}%</td></tr>
+        <tr><td>Năng lượng hữu dụng của pin bạn chọn</td><td>${fmt(r.usable)} MWh</td></tr>
+        <tr><td>Chi phí (2 × MW + 1 × MWh)</td><td>${fmt(r.cost)} điểm</td></tr>`;
+      $('l2Checks').innerHTML = checkItem(r.okP, 'Đủ công suất', `${c.P} MW so với ${r.needP} MW cần cấp`) + checkItem(r.okE, 'Đủ năng lượng', `${fmt(r.usable)} MWh hữu dụng so với ${fmt(r.needE)} MWh cần cấp`);
+      $('l2Chart').innerHTML = socChart(sc, r, c);
+      renderParts('l2', G.gradeL2(curL2, state.l2[curL2]));
+    }
+    function socChart(sc, r, c) {
+      const W = 560, H = 250, l = 46, rt = 14, t = 14, b = 38;
+      const T = r.socTrace[r.socTrace.length - 1].t;
+      const lo = Math.max(-0.5, Math.min(0, ...r.socTrace.map(p => isFinite(p.soc) ? p.soc : -0.5)));
+      const x = v => l + v / T * (W - l - rt), y = v => t + (1 - (v - lo) / (1 - lo)) * (H - t - b);
+      const bad = !r.okE;
+      let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Đồ thị SOC của pin trong sự cố">`;
+      for (let g = 0; g <= 1.0001; g += 0.2) s += `<line x1="${l}" x2="${W - rt}" y1="${y(g)}" y2="${y(g)}" stroke="#e6ebf1"/><text x="${l - 6}" y="${y(g) + 4}" font-size="11" text-anchor="end" fill="#5b6673">${Math.round(g * 100)}%</text>`;
+      if (lo < 0) s += `<rect x="${l}" y="${y(0)}" width="${W - l - rt}" height="${y(lo) - y(0)}" fill="#fbeaea"/><text x="${l + 6}" y="${y(lo) - 5}" font-size="11" fill="#c00000">Dưới 0%: pin cạn trước khi hết sự cố</text>`;
+      s += `<line x1="${l}" x2="${W - rt}" y1="${y(sc.socMin)}" y2="${y(sc.socMin)}" stroke="#c00000" stroke-dasharray="6 4"/><text x="${l + 6}" y="${y(sc.socMin) - 5}" font-size="11" fill="#c00000">SOC tối thiểu ${Math.round(sc.socMin * 100)}%</text>`;
+      if (c.E > 0) {
+        const pts = r.socTrace.map(p => `${x(p.t)},${y(Math.max(lo, p.soc))}`).join(' ');
+        s += `<polyline points="${pts}" fill="none" stroke="${bad ? '#c00000' : '#003366'}" stroke-width="3"/>`;
+        r.socTrace.forEach(p => { s += `<circle cx="${x(p.t)}" cy="${y(Math.max(lo, p.soc))}" r="4" fill="${bad ? '#c00000' : '#003366'}"/>`; });
+        const end = r.socTrace[r.socTrace.length - 1];
+        s += `<text x="${x(end.t) - 6}" y="${y(Math.max(lo, end.soc)) - 9}" font-size="12" font-weight="700" text-anchor="end" fill="${bad ? '#c00000' : '#003366'}">${Math.round(end.soc * 100)}%</text>`;
+      } else {
+        s += `<text x="${(l + W - rt) / 2}" y="${H / 2}" font-size="13" text-anchor="middle" fill="#5b6673">Chọn dung lượng E để xem SOC</text>`;
+      }
+      r.socTrace.map(p => p.t).forEach(v => {
+        s += `<text x="${x(v)}" y="${H - b + 16}" font-size="11" text-anchor="middle" fill="#5b6673">${fmt(v)} h</text>`;
+      });
+      s += `<text x="${(l + W - rt) / 2}" y="${H - 4}" font-size="11" text-anchor="middle" fill="#5b6673">Thời gian kể từ lúc mất nguồn chính</text></svg>`;
+      return s;
+    }
+
+    /* ---------------- Cấp 3 ---------------- */
+    function buildL3() {
+      buildScenButtons($('l3Scen'), G.LEVEL3.scenarios, i => { curL3 = i; renderL3(); });
+      $('l3Sliders').innerHTML = G.LEVEL3.blocks.map((b, i) => `
+        <div class="slider"><label>Sạc khung ${b.label} · giá ${fmt(b.price)} <output id="l3out${i}"></output></label>
+        <input type="range" id="l3s${i}" min="0" step="${G.LEVEL3.stepKW}" /><div class="hint" id="l3hint${i}"></div></div>`).join('');
+      G.LEVEL3.blocks.forEach((b, i) => $('l3s' + i).addEventListener('input', () => {
+        state.l3[curL3] = { kw: G.LEVEL3.blocks.map((_, j) => Number($('l3s' + j).value)) };
+        renderL3(); refresh();
+      }));
+    }
+    function renderL3() {
+      const sc = G.LEVEL3.scenarios[curL3], cap = G.chargerCapKW(sc), c = state.l3[curL3] || { kw: [0, 0, 0] };
+      markScen($('l3Scen'), curL3, i => !!state.l3[i]);
+      $('l3Story').textContent = sc.story;
+      G.LEVEL3.blocks.forEach((b, i) => {
+        const s = $('l3s' + i); s.max = cap; s.value = c.kw[i];
+        $('l3out' + i).textContent = fmt(c.kw[i] / 1000) + ' MW';
+        $('l3hint' + i).textContent = `Tải sinh hoạt ${fmt(sc.baseKW[i] / 1000)} MW · tối đa ${fmt(cap / 1000)} MW (${sc.cars} bộ × 7 kW)`;
+      });
+      const r = G.computeL3(sc, c);
+      $('l3Table').innerHTML = `
+        <tr><td>Năng lượng xe cần (${sc.cars} xe × 25 kWh)</td><td>${fmt(r.needKWh / 1000)} MWh</td></tr>
+        <tr><td>Năng lượng đã sạc (công suất × 4 h mỗi khung)</td><td>${fmt(r.energyKWh / 1000)} MWh</td></tr>
+        <tr><td>Máy biến áp mang tải lớn nhất</td><td>${r.maxPct.toFixed(1)} %</td></tr>
+        <tr><td>Tiền điện sạc (MWh × giá)</td><td>${fmt(r.cost)}</td></tr>`;
+      $('l3Checks').innerHTML = checkItem(r.maxPct <= 100 + 1e-9, 'Máy biến áp không quá tải ở mọi khung giờ', `Lớn nhất ${r.maxPct.toFixed(1)} %`)
+        + checkItem(r.energyKWh >= r.needKWh - 1e-9, 'Xe sạc đủ trước 6 giờ sáng', `${fmt(r.energyKWh / 1000)} / ${fmt(r.needKWh / 1000)} MWh`);
+      $('l3Chart').innerHTML = loadChart(sc, r);
+      $('l3Free').textContent = `So sánh: nếu ${sc.cars} xe cùng cắm sạc tự do lúc 18 giờ, máy biến áp phải mang ${fmt(sc.baseKW[0] / 1000)} + ${fmt(cap / 1000)} = ${fmt((sc.baseKW[0] + cap) / 1000)} MW, tức ${r.freeChargingPct.toFixed(0)} % công suất.`;
+      renderParts('l3', G.gradeL3(curL3, state.l3[curL3]));
+    }
+    function loadChart(sc, r) {
+      const W = 560, H = 260, l = 46, rt = 14, t = 16, b = 40;
+      const top = Math.max(7000, ...r.loads.map(d => d.totalKW + 400));
+      const y = v => t + (1 - v / top) * (H - t - b);
+      const lim = G.LEVEL3.transformerKW, n = r.loads.length, slot = (W - l - rt) / n, bw = slot * 0.5;
+      let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tải máy biến áp theo khung giờ">`;
+      for (let g = 0; g <= top; g += 1000) s += `<line x1="${l}" x2="${W - rt}" y1="${y(g)}" y2="${y(g)}" stroke="#e6ebf1"/><text x="${l - 6}" y="${y(g) + 4}" font-size="11" text-anchor="end" fill="#5b6673">${g / 1000} MW</text>`;
+      r.loads.forEach((d, i) => {
+        const x = l + slot * i + (slot - bw) / 2, over = d.totalKW > lim + 1e-9;
+        s += `<rect x="${x}" y="${y(d.baseKW)}" width="${bw}" height="${y(0) - y(d.baseKW)}" fill="#b8c4d1"/>`;
+        if (d.chargeKW > 0) s += `<rect x="${x}" y="${y(d.totalKW)}" width="${bw}" height="${y(d.baseKW) - y(d.totalKW)}" fill="${over ? '#c00000' : '#003366'}"/>`;
+        s += `<text x="${x + bw / 2}" y="${y(d.totalKW) - 6}" font-size="12" font-weight="700" text-anchor="middle" fill="${over ? '#c00000' : '#1f2933'}">${d.pct.toFixed(0)}%</text>`;
+        s += `<text x="${x + bw / 2}" y="${H - b + 16}" font-size="12" text-anchor="middle" fill="#1f2933">${G.LEVEL3.blocks[i].label}</text>`;
+        s += `<text x="${x + bw / 2}" y="${H - b + 31}" font-size="11" text-anchor="middle" fill="#5b6673">giá ${fmt(G.LEVEL3.blocks[i].price)}</text>`;
+      });
+      s += `<line x1="${l}" x2="${W - rt}" y1="${y(lim)}" y2="${y(lim)}" stroke="#c00000" stroke-width="2" stroke-dasharray="6 4"/><text x="${W - rt - 4}" y="${y(lim) - 6}" font-size="11" text-anchor="end" fill="#c00000">Giới hạn MBA 4 MW</text>`;
+      s += `<rect x="${l + 4}" y="${t}" width="10" height="10" fill="#b8c4d1"/><text x="${l + 18}" y="${t + 9}" font-size="11" fill="#5b6673">Tải sinh hoạt</text>`;
+      s += `<rect x="${l + 104}" y="${t}" width="10" height="10" fill="#003366"/><text x="${l + 118}" y="${t + 9}" font-size="11" fill="#5b6673">Sạc xe điện</text></svg>`;
+      return s;
+    }
+
+    /* ---------------- Nghề nghiệp ---------------- */
+    function buildCareer() {
+      const opt = (list, what) => `<option value="">— chọn ${what} —</option>` + list.map((x, i) => `<option value="${i}">${escapeHtml(x)}</option>`).join('');
+      $('careerBody').innerHTML = G.TASKS.map((tk, i) => `<tr><td><b>${i + 1}.</b> ${escapeHtml(tk)}</td>
+        <td><select data-i="${i}" data-f="role" aria-label="Vai trò cho tình huống ${i + 1}">${opt(G.ROLES, 'vai trò')}</select></td>
+        <td><select data-i="${i}" data-f="product" aria-label="Sản phẩm cho tình huống ${i + 1}">${opt(G.PRODUCTS, 'sản phẩm')}</select></td></tr>`).join('');
+      $('careerBody').addEventListener('change', e => {
+        const s = e.target; if (!s.dataset.f) return;
+        state.career[Number(s.dataset.i)][s.dataset.f] = s.value === '' ? '' : Number(s.value);
+        refresh();
+      });
+    }
+    function renderCareer() {
+      document.querySelectorAll('#careerBody select').forEach(s => { s.value = String(state.career[Number(s.dataset.i)][s.dataset.f]); });
+    }
+    function careerAnswered() { return state.career.filter(a => a.role !== '' && a.product !== '').length; }
+
+    /* ---------------- Tổng hợp ---------------- */
+    function answers() { return { l1: state.l1, l2: state.l2, l3: state.l3, career: state.career }; }
+    function refresh() {
+      const g = G.gradeSubmission(answers());
+      const est = g.l1.score + g.l2.total + g.l3.total;
+      $('estHeader').textContent = `Dự kiến: ${fmt(est)}/80`;
+      $('tabPts-l1').textContent = `${g.l1.score}/20`;
+      $('tabPts-l2').textContent = `${g.l2.total}/30`;
+      $('tabPts-l3').textContent = `${g.l3.total}/30`;
+      $('tabPts-career').textContent = `${careerAnswered()}/8 câu`;
+      $('careerCount').textContent = `Đã trả lời đủ ${careerAnswered()}/8 tình huống.`;
+      saveDraft();
+      return g;
+    }
+    function renderSummary() {
+      const g = refresh();
+      const row = (name, status, s, max) => `<tr><td>${name}</td><td>${status}</td><td class="num">${s === null ? '<i>chấm khi nộp</i>' : `<span class="pill ${pillClass(s, max)}">${fmt(s)}/${max}</span>`}</td></tr>`;
+      const todo = (obj) => [1, 2, 3].filter(i => !obj[i]).map(i => 'KB ' + i);
+      const st2 = todo(state.l2), st3 = todo(state.l3);
+      $('summaryBody').innerHTML =
+        row('Cấp 1 — Chọn hạng mục', G.LEVEL1.order.some(k => state.l1[k]) ? 'Đã chọn' : '<span style="color:var(--warn)">Chưa làm</span>', g.l1.score, 20) +
+        row('Cấp 2 — Định cỡ BESS', st2.length ? `<span style="color:var(--warn)">Chưa làm: ${st2.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l2.total, 30) +
+        row('Cấp 3 — Bãi sạc xe điện', st3.length ? `<span style="color:var(--warn)">Chưa làm: ${st3.join(', ')}</span>` : 'Đủ 3 kịch bản', g.l3.total, 30) +
+        row('Nghề nghiệp', `Đã trả lời ${careerAnswered()}/8`, null, 20);
+    }
+
+    /* ---------------- Máy chủ ---------------- */
+    async function apiGet(params) {
+      const res = await fetch(SUBMIT_API_URL + '?' + new URLSearchParams(params).toString());
+      return res.json();
+    }
+    async function loadServerInfo() {
+      const el = $('serverStatus');
+      if (!SUBMIT_API_URL) { el.innerHTML = '<span style="color:var(--warn)">Giảng viên chưa kết nối máy chủ nộp bài.</span>'; return; }
+      try {
+        serverInfo = await apiGet({ action: 'info', mssv: $('studentId').value.trim() });
+        const parts = [serverInfo.open ? '<b style="color:var(--ok)">● Đang nhận bài</b>' : '<b style="color:var(--red)">● Đã khóa nộp bài</b>'];
+        if (serverInfo.deadline) parts.push('Hạn nộp: ' + escapeHtml(serverInfo.deadline));
+        parts.push('Tối đa ' + serverInfo.maxSubmissions + ' lượt');
+        parts.push(serverInfo.scoreMode === 'lan_cuoi' ? 'Tính điểm lần nộp cuối' : 'Tính điểm lần nộp cao nhất');
+        el.innerHTML = parts.join(' · ');
+        $('attempts').textContent = $('studentId').value.trim() ? `${serverInfo.used} / ${serverInfo.maxSubmissions}` : `– / ${serverInfo.maxSubmissions}`;
+      } catch (e) { el.innerHTML = '<span style="color:var(--red)">Không kết nối được máy chủ nộp bài.</span>'; }
+    }
+
+    function showModal(title, html, actions) {
+      $('modalTitle').textContent = title; $('modalBody').innerHTML = html;
+      const box = $('modalActions'); box.innerHTML = '';
+      (actions || [{ label: 'Đóng', cls: 'btn-secondary', onClick: closeModal }]).forEach(a => {
+        const b = document.createElement('button'); b.className = 'btn ' + a.cls; b.textContent = a.label; b.onclick = a.onClick; box.appendChild(b);
+      });
+      $('modalBg').classList.add('show');
+    }
+    function closeModal() { $('modalBg').classList.remove('show'); }
+    $('modalBg').addEventListener('click', e => { if (e.target === $('modalBg')) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    $('submitBtn').addEventListener('click', () => {
+      const name = $('studentName').value.trim(), mssv = $('studentId').value.trim(), cls = $('studentClass').value.trim();
+      if (!SUBMIT_API_URL) { showModal('Chưa thể nộp bài', '<p>Giảng viên chưa kết nối máy chủ nộp bài cho trang này.</p>'); return; }
+      if (name.length < 3 || !mssv) { showModal('Thiếu thông tin', '<p>Nhập đầy đủ <b>họ và tên</b> và <b>MSSV</b> ở góc trên trước khi nộp.</p>'); return; }
+      const g = refresh();
+      const left = serverInfo ? serverInfo.maxSubmissions - serverInfo.used : null;
+      showModal('Xác nhận nộp bài', `<table class="kv">
+          <tr><td>Sinh viên</td><td>${escapeHtml(name)} — ${escapeHtml(mssv)}${cls ? ' — ' + escapeHtml(cls) : ''}</td></tr>
+          <tr><td>Điểm dự kiến cấp 1–3</td><td>${fmt(g.l1.score + g.l2.total + g.l3.total)} / 80</td></tr>
+          <tr><td>Phần nghề nghiệp</td><td>${careerAnswered()}/8 câu đã trả lời</td></tr>
+          ${left !== null ? `<tr><td>Lượt nộp còn lại</td><td>${left} / ${serverInfo.maxSubmissions}</td></tr>` : ''}
+        </table><p class="note" style="margin-top:10px">Máy chủ sẽ chấm lại toàn bộ theo đáp án. Mỗi lần nộp tính một lượt.</p>`,
+        [{ label: 'Quay lại', cls: 'btn-secondary', onClick: closeModal }, { label: 'Xác nhận nộp', cls: 'btn-success', onClick: () => doSubmit(name, mssv, cls) }]);
+    });
+
+    async function doSubmit(name, mssv, cls) {
+      closeModal();
+      const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Đang nộp bài...';
+      try {
+        // Gửi dạng text/plain để tránh preflight CORS với Google Apps Script
+        const res = await fetch(SUBMIT_API_URL, { method: 'POST', body: JSON.stringify({ name, mssv, className: cls, answers: answers(), clientVersion: G.VERSION }) });
+        const data = await res.json();
+        if (!data.ok) { showModal('Nộp bài không thành công', `<p style="color:var(--red)">${escapeHtml(data.error || 'Lỗi không xác định')}</p>`); return; }
+        showResult(data);
+      } catch (e) {
+        showModal('Lỗi kết nối', '<p>Không gửi được bài lên máy chủ. Kiểm tra mạng rồi thử lại; bài làm vẫn được lưu trên trình duyệt.</p>');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Nộp bài cho giảng viên'; loadServerInfo();
+      }
+    }
+
+    function showResult(data) {
+      const g = data.grading;
+      const scen = (lvl, name, sc) => [1, 2, 3].map(i => {
+        const s = g[lvl].scenarios[i];
+        const det = s.parts.map(p => `${escapeHtml(p.label)}: ${fmt(p.pts)}/${p.max}`).join('<br>') || escapeHtml(s.note);
+        return `<tr><td>${name} — ${escapeHtml(sc[i].name)}</td><td class="note">${det}</td><td class="num"><span class="pill ${pillClass(s.score, 10)}">${fmt(s.score)}/10</span></td></tr>`;
+      }).join('');
+      const l1det = g.l1.parts.map(p => `${escapeHtml(p.label)}: ${fmt(p.pts)}/${p.max}`).join('<br>') || escapeHtml(g.l1.note);
+      let career = `Đã trả lời ${g.career.answered}/8`;
+      if (g.career.items) career = g.career.items.map(it => `Câu ${it.task}: vai trò ${it.roleOk ? '✓' : '✗'}, sản phẩm ${it.productOk ? '✓' : '✗'}`).join('<br>');
+      showModal(`Nộp bài thành công — lần ${data.attempt}/${data.maxSubmissions}`,
+        `<div style="display:flex; gap:28px; flex-wrap:wrap; margin-bottom:12px;">
+           <div><div class="note">ĐIỂM LẦN NỘP NÀY</div><div style="font-size:2rem; font-weight:700; color:var(--navy)">${g.score10.toFixed(1)}</div></div>
+           <div><div class="note">ĐIỂM CHÍNH THỨC (${data.scoreMode === 'lan_cuoi' ? 'lần cuối' : 'cao nhất'})</div><div style="font-size:2rem; font-weight:700; color:var(--ok)">${Number(data.officialScore).toFixed(1)}</div></div>
+           <div class="note" style="align-self:flex-end">Nộp lúc ${escapeHtml(data.submittedAt)}</div>
+         </div>
+         <div class="scroll"><table class="report"><thead><tr><th>Phần</th><th>Chi tiết</th><th class="num">Điểm</th></tr></thead><tbody>
+           <tr><td>Cấp 1 — Chọn hạng mục</td><td class="note">${l1det}</td><td class="num"><span class="pill ${pillClass(g.l1.score, 20)}">${fmt(g.l1.score)}/20</span></td></tr>
+           ${scen('l2', 'Cấp 2', G.LEVEL2.scenarios)}${scen('l3', 'Cấp 3', G.LEVEL3.scenarios)}
+           <tr><td>Nghề nghiệp</td><td class="note">${career}</td><td class="num"><span class="pill ${pillClass(g.career.score, 20)}">${fmt(g.career.score)}/20</span></td></tr>
+         </tbody></table></div>
+         ${data.published ? '' : '<p class="note" style="color:var(--warn); margin-top:8px">Giảng viên chưa mở công bố bảng điểm.</p>'}`,
+        [{ label: 'Đóng', cls: 'btn-secondary', onClick: closeModal }, { label: 'Xem bảng điểm', cls: 'btn-primary', onClick: () => { closeModal(); switchTab('board'); } }]);
+    }
+
+    $('resetBtn').addEventListener('click', () => showModal('Làm lại từ đầu?', '<p>Toàn bộ lựa chọn ở cả bốn phần sẽ bị xóa khỏi trình duyệt này. Các lần đã nộp không bị ảnh hưởng.</p>',
+      [{ label: 'Hủy', cls: 'btn-secondary', onClick: closeModal }, { label: 'Xóa và làm lại', cls: 'btn-primary', onClick: () => { state = freshState(); renderAll(); renderSummary(); closeModal(); } }]));
+
+    /* ---------------- Bảng điểm ---------------- */
+    function maskId(id) { id = String(id); return id.length <= 4 ? id : id.slice(0, 2) + '•'.repeat(id.length - 4) + id.slice(-2); }
+    async function loadBoard() {
+      const body = $('boardBody');
+      if (!SUBMIT_API_URL) { body.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--muted)">Giảng viên chưa kết nối máy chủ bảng điểm.</td></tr>'; return; }
+      try {
+        const data = await apiGet({ action: 'scores' });
+        if (!data.published) { boardRows = []; body.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--muted)">Giảng viên chưa công bố bảng điểm.</td></tr>'; $('boardStats').textContent = ''; return; }
+        boardRows = data.rows || [];
+        const sel = $('boardClass'), cur = sel.value;
+        const classes = [...new Set(boardRows.map(r => r.cls).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">Tất cả các lớp</option>' + classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        sel.value = classes.includes(cur) ? cur : '';
+        renderBoard();
+      } catch (e) { body.innerHTML = '<tr><td colspan="11" style="text-align:center; color:var(--red)">Không tải được bảng điểm. Thử lại sau.</td></tr>'; }
+    }
+    function renderBoard() {
+      const term = $('boardSearch').value.trim().toLowerCase(), cls = $('boardClass').value;
+      const myName = $('studentName').value.trim().toLowerCase(), rawId = $('studentId').value.trim().toUpperCase();
+      const rows = boardRows.filter(r => !cls || r.cls === cls).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'vi'));
+      let rank = 0, prev = null;
+      rows.forEach((r, i) => { if (r.score !== prev) { rank = i + 1; prev = r.score; } r.rank = rank; });
+      const shown = rows.filter(r => !term || r.name.toLowerCase().includes(term) || String(r.mssv).toLowerCase().includes(term));
+      $('boardBody').innerHTML = shown.length ? shown.map(r => {
+        const me = myName && r.name.toLowerCase() === myName && (r.mssv === maskId(rawId) || String(r.mssv).toUpperCase() === rawId);
+        return `<tr class="${me ? 'me' : ''}"><td class="num">${r.rank}</td><td>${escapeHtml(r.name)}${me ? ' <b style="color:var(--navy)">(bạn)</b>' : ''}</td><td>${escapeHtml(r.mssv)}</td><td>${escapeHtml(r.cls)}</td>
+          <td class="num">${fmt(r.l1)}</td><td class="num">${fmt(r.l2)}</td><td class="num">${fmt(r.l3)}</td><td class="num">${fmt(r.nn)}</td>
+          <td class="num"><span class="pill ${pillClass(r.score, 10)}">${Number(r.score).toFixed(1)}</span>${r.adjusted ? ' <span title="Giảng viên đã điều chỉnh" style="color:var(--warn)">*</span>' : ''}</td>
+          <td class="num">${r.count}</td><td>${escapeHtml(r.updated)}</td></tr>`;
+      }).join('') : `<tr><td colspan="11" style="text-align:center; color:var(--muted)">${boardRows.length ? 'Không có kết quả phù hợp.' : 'Chưa có sinh viên nào nộp bài.'}</td></tr>`;
+      const sc = rows.map(r => Number(r.score));
+      $('boardStats').textContent = sc.length ? `Số SV đã nộp: ${sc.length} · Điểm TB: ${(sc.reduce((a, b) => a + b, 0) / sc.length).toFixed(2)} · Cao nhất: ${Math.max(...sc).toFixed(1)}` : '';
+    }
+    $('boardSearch').addEventListener('input', renderBoard);
+    $('boardClass').addEventListener('change', renderBoard);
+    $('boardReload').addEventListener('click', loadBoard);
+    ['studentName', 'studentId', 'studentClass'].forEach(id => $(id).addEventListener('change', saveDraft));
+
+    function renderAll() { renderL1(); renderL2(); renderL3(); renderCareer(); refresh(); }
+    loadDraft();
+    buildL1(); buildL2(); buildL3(); buildCareer();
+    renderAll();
+  </script>
+</body>
+</html>
